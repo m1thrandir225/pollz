@@ -1,0 +1,24 @@
+-- name: CreateVote :one
+INSERT INTO votes(
+    option_id,
+    user_id,
+    ip_address,
+    user_agent
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4
+) RETURNING *;
+
+-- name: UpdateVoteOption :one
+UPDATE votes
+SET option_id=$2
+WHERE id=$1
+RETURNING *;
+
+-- name: DeleteVote :one
+DELETE FROM votes
+WHERE id=$1
+RETURNING *;
