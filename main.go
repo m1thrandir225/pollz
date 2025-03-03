@@ -42,7 +42,7 @@ func main() {
 }
 
 func runGinServer(settings ginServerConfig) {
-	server, err := api.NewServer()
+	server, err := api.NewServer(settings.Store, settings.Config)
 	if err != nil {
 		log.Fatal("Cannot create server")
 	}
