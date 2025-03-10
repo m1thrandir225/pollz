@@ -49,20 +49,14 @@ func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreateP
 	return i, err
 }
 
-const disablePoll = `-- name: DisablePoll :one
-UPDATE polls
-SET is_active=$2
+const deletePoll = `-- name: DeletePoll :one
+DELETE FROM polls
 WHERE id = $1
-RETURNING id, description, is_active, created_by, created_at, updated_at
+RETURNING  id, description, is_active, created_by, created_at, updated_at
 `
 
-type DisablePollParams struct {
-	ID       uuid.UUID `json:"id"`
-	IsActive bool      `json:"is_active"`
-}
-
-func (q *Queries) DisablePoll(ctx context.Context, arg DisablePollParams) (Poll, error) {
-	row := q.db.QueryRow(ctx, disablePoll, arg.ID, arg.IsActive)
+func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
+	row := q.db.QueryRow(ctx, deletePoll, id)
 	var i Poll
 	err := row.Scan(
 		&i.ID,
@@ -108,6 +102,90 @@ func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error)
 		&i.PollID,
 		&i.OptionText,
 		&i.CreatedAt_2,
+	)
+	return i, err
+}
+
+const getPolls = `-- name: GetPolls :many
+SELECT id, description, is_active, created_by, created_at, updated_at FROM polls
+`
+
+func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
+	rows, err := q.db.Query(ctx, getPolls)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Poll{}
+	for rows.Next() {
+		var i Poll
+		if err := rows.Scan(
+			&i.ID,
+			&i.Description,
+			&i.IsActive,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePoll = `-- name: UpdatePoll :one
+UPDATE polls
+SET description=$2, is_active=$3
+WHERE id = $1
+RETURNING  id, description, is_active, created_by, created_at, updated_at
+`
+
+type UpdatePollParams struct {
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
+}
+
+func (q *Queries) UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, error) {
+	row := q.db.QueryRow(ctx, updatePoll, arg.ID, arg.Description, arg.IsActive)
+	var i Poll
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.IsActive,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updatePollStatus = `-- name: UpdatePollStatus :one
+UPDATE polls
+SET is_active=$2
+WHERE id = $1
+RETURNING id, description, is_active, created_by, created_at, updated_at
+`
+
+type UpdatePollStatusParams struct {
+	ID       uuid.UUID `json:"id"`
+	IsActive bool      `json:"is_active"`
+}
+
+func (q *Queries) UpdatePollStatus(ctx context.Context, arg UpdatePollStatusParams) (Poll, error) {
+	row := q.db.QueryRow(ctx, updatePollStatus, arg.ID, arg.IsActive)
+	var i Poll
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.IsActive,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
