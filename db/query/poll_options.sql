@@ -7,6 +7,17 @@ INSERT INTO poll_options(
     sqlc.arg(option_text)::text
 ) RETURNING *;
 
+-- name: GetOption :one
+SELECT * FROM poll_options
+WHERE id=$1
+LIMIT 1;
+
+-- name: UpdatePollOption :one
+UPDATE poll_options
+SET option_text=$2
+WHERE id=$1
+RETURNING *;
+
 -- name: DeletePollOption :one
 DELETE from poll_options
 WHERE id = sqlc.arg(id)::uuid

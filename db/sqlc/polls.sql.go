@@ -74,3 +74,40 @@ func (q *Queries) DisablePoll(ctx context.Context, arg DisablePollParams) (Poll,
 	)
 	return i, err
 }
+
+const getPoll = `-- name: GetPoll :one
+SELECT p.id, description, is_active, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
+JOIN public.poll_options po on p.id = po.poll_id
+WHERE p.id=$1
+`
+
+type GetPollRow struct {
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
+	CreatedBy   uuid.UUID `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	ID_2        uuid.UUID `json:"id_2"`
+	PollID      uuid.UUID `json:"poll_id"`
+	OptionText  string    `json:"option_text"`
+	CreatedAt_2 time.Time `json:"created_at_2"`
+}
+
+func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error) {
+	row := q.db.QueryRow(ctx, getPoll, id)
+	var i GetPollRow
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.IsActive,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ID_2,
+		&i.PollID,
+		&i.OptionText,
+		&i.CreatedAt_2,
+	)
+	return i, err
+}

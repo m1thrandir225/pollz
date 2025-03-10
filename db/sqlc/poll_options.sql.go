@@ -55,3 +55,45 @@ func (q *Queries) DeletePollOption(ctx context.Context, id uuid.UUID) (PollOptio
 	)
 	return i, err
 }
+
+const getOption = `-- name: GetOption :one
+SELECT id, poll_id, option_text, created_at FROM poll_options
+WHERE id=$1
+LIMIT 1
+`
+
+func (q *Queries) GetOption(ctx context.Context, id uuid.UUID) (PollOption, error) {
+	row := q.db.QueryRow(ctx, getOption, id)
+	var i PollOption
+	err := row.Scan(
+		&i.ID,
+		&i.PollID,
+		&i.OptionText,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updatePollOption = `-- name: UpdatePollOption :one
+UPDATE poll_options
+SET option_text=$2
+WHERE id=$1
+RETURNING id, poll_id, option_text, created_at
+`
+
+type UpdatePollOptionParams struct {
+	ID         uuid.UUID `json:"id"`
+	OptionText string    `json:"option_text"`
+}
+
+func (q *Queries) UpdatePollOption(ctx context.Context, arg UpdatePollOptionParams) (PollOption, error) {
+	row := q.db.QueryRow(ctx, updatePollOption, arg.ID, arg.OptionText)
+	var i PollOption
+	err := row.Scan(
+		&i.ID,
+		&i.PollID,
+		&i.OptionText,
+		&i.CreatedAt,
+	)
+	return i, err
+}
