@@ -22,6 +22,7 @@ type Querier interface {
 	GetOption(ctx context.Context, id uuid.UUID) (PollOption, error)
 	GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error)
 	GetPolls(ctx context.Context) ([]Poll, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserDetails(ctx context.Context, id uuid.UUID) (User, error)
 	GetVote(ctx context.Context, id uuid.UUID) (Vote, error)
 	UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, error)
