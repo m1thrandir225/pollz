@@ -7,41 +7,41 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPoll = `-- name: CreatePoll :one
 INSERT INTO polls(
-    question,
+    description,
     created_by
 )
 VALUES (
     $1,
     $2
-) RETURNING id, question, created_by, is_active, created_at
+) RETURNING id, description, created_by, is_active, created_at
 `
 
 type CreatePollParams struct {
-	Question  string      `json:"question"`
-	CreatedBy pgtype.UUID `json:"created_by"`
+	Description string    `json:"description"`
+	CreatedBy   uuid.UUID `json:"created_by"`
 }
 
 type CreatePollRow struct {
-	ID        uuid.UUID          `json:"id"`
-	Question  string             `json:"question"`
-	CreatedBy pgtype.UUID        `json:"created_by"`
-	IsActive  pgtype.Bool        `json:"is_active"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	CreatedBy   uuid.UUID `json:"created_by"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreatePollRow, error) {
-	row := q.db.QueryRow(ctx, createPoll, arg.Question, arg.CreatedBy)
+	row := q.db.QueryRow(ctx, createPoll, arg.Description, arg.CreatedBy)
 	var i CreatePollRow
 	err := row.Scan(
 		&i.ID,
-		&i.Question,
+		&i.Description,
 		&i.CreatedBy,
 		&i.IsActive,
 		&i.CreatedAt,
@@ -53,12 +53,12 @@ const disablePoll = `-- name: DisablePoll :one
 UPDATE polls
 SET is_active=$2
 WHERE id = $1
-RETURNING id, question, created_by, is_active, created_at, updated_at
+RETURNING id, description, is_active, created_by, created_at, updated_at
 `
 
 type DisablePollParams struct {
-	ID       uuid.UUID   `json:"id"`
-	IsActive pgtype.Bool `json:"is_active"`
+	ID       uuid.UUID `json:"id"`
+	IsActive bool      `json:"is_active"`
 }
 
 func (q *Queries) DisablePoll(ctx context.Context, arg DisablePollParams) (Poll, error) {
@@ -66,9 +66,9 @@ func (q *Queries) DisablePoll(ctx context.Context, arg DisablePollParams) (Poll,
 	var i Poll
 	err := row.Scan(
 		&i.ID,
-		&i.Question,
-		&i.CreatedBy,
+		&i.Description,
 		&i.IsActive,
+		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

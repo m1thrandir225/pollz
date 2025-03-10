@@ -20,6 +20,7 @@ type Querier interface {
 	DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error)
 	DisablePoll(ctx context.Context, arg DisablePollParams) (Poll, error)
 	GetUserDetails(ctx context.Context, id uuid.UUID) (User, error)
+	GetVote(ctx context.Context, id uuid.UUID) (Vote, error)
 	UpdateVoteOption(ctx context.Context, arg UpdateVoteOptionParams) (Vote, error)
 }
 

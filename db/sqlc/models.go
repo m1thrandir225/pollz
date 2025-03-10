@@ -12,19 +12,19 @@ import (
 )
 
 type Poll struct {
-	ID        uuid.UUID          `json:"id"`
-	Question  string             `json:"question"`
-	CreatedBy pgtype.UUID        `json:"created_by"`
-	IsActive  pgtype.Bool        `json:"is_active"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
+	CreatedBy   uuid.UUID `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type PollOption struct {
-	ID         uuid.UUID   `json:"id"`
-	PollID     pgtype.UUID `json:"poll_id"`
-	OptionText string      `json:"option_text"`
-	CreatedAt  time.Time   `json:"created_at"`
+	ID         uuid.UUID `json:"id"`
+	PollID     uuid.UUID `json:"poll_id"`
+	OptionText string    `json:"option_text"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type User struct {
@@ -38,10 +38,10 @@ type User struct {
 }
 
 type Vote struct {
-	ID        uuid.UUID          `json:"id"`
-	OptionID  pgtype.UUID        `json:"option_id"`
-	UserID    pgtype.UUID        `json:"user_id"`
-	VotedAt   pgtype.Timestamptz `json:"voted_at"`
-	IpAddress pgtype.Text        `json:"ip_address"`
-	UserAgent pgtype.Text        `json:"user_agent"`
+	ID        uuid.UUID `json:"id"`
+	OptionID  uuid.UUID `json:"option_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	VotedAt   time.Time `json:"voted_at"`
+	IpAddress string    `json:"ip_address"`
+	UserAgent string    `json:"user_agent"`
 }

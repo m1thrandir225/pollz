@@ -12,6 +12,12 @@ VALUES (
     $4
 ) RETURNING *;
 
+-- name: GetVote :one
+SELECT *
+FROM votes
+WHERE id=$1
+LIMIT 1;
+
 -- name: UpdateVoteOption :one
 UPDATE votes
 SET option_id=$2

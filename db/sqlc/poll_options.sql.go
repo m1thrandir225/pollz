@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPollOption = `-- name: CreatePollOption :one
@@ -17,14 +16,14 @@ INSERT INTO poll_options(
     poll_id,
     option_text
 ) VALUES (
-    $1,
-    $2
+    $1::uuid,
+    $2::text
 ) RETURNING id, poll_id, option_text, created_at
 `
 
 type CreatePollOptionParams struct {
-	PollID     pgtype.UUID `json:"poll_id"`
-	OptionText string      `json:"option_text"`
+	PollID     uuid.UUID `json:"poll_id"`
+	OptionText string    `json:"option_text"`
 }
 
 func (q *Queries) CreatePollOption(ctx context.Context, arg CreatePollOptionParams) (PollOption, error) {
@@ -41,7 +40,7 @@ func (q *Queries) CreatePollOption(ctx context.Context, arg CreatePollOptionPara
 
 const deletePollOption = `-- name: DeletePollOption :one
 DELETE from poll_options
-WHERE id = $1
+WHERE id = $1::uuid
 RETURNING id, poll_id, option_text, created_at
 `
 

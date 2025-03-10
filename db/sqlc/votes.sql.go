@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createVote = `-- name: CreateVote :one
@@ -28,10 +27,10 @@ VALUES (
 `
 
 type CreateVoteParams struct {
-	OptionID  pgtype.UUID `json:"option_id"`
-	UserID    pgtype.UUID `json:"user_id"`
-	IpAddress pgtype.Text `json:"ip_address"`
-	UserAgent pgtype.Text `json:"user_agent"`
+	OptionID  uuid.UUID `json:"option_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	IpAddress string    `json:"ip_address"`
+	UserAgent string    `json:"user_agent"`
 }
 
 func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, error) {
@@ -73,6 +72,27 @@ func (q *Queries) DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error) {
 	return i, err
 }
 
+const getVote = `-- name: GetVote :one
+SELECT id, option_id, user_id, voted_at, ip_address, user_agent
+FROM votes
+WHERE id=$1
+LIMIT 1
+`
+
+func (q *Queries) GetVote(ctx context.Context, id uuid.UUID) (Vote, error) {
+	row := q.db.QueryRow(ctx, getVote, id)
+	var i Vote
+	err := row.Scan(
+		&i.ID,
+		&i.OptionID,
+		&i.UserID,
+		&i.VotedAt,
+		&i.IpAddress,
+		&i.UserAgent,
+	)
+	return i, err
+}
+
 const updateVoteOption = `-- name: UpdateVoteOption :one
 UPDATE votes
 SET option_id=$2
@@ -81,8 +101,8 @@ RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
 `
 
 type UpdateVoteOptionParams struct {
-	ID       uuid.UUID   `json:"id"`
-	OptionID pgtype.UUID `json:"option_id"`
+	ID       uuid.UUID `json:"id"`
+	OptionID uuid.UUID `json:"option_id"`
 }
 
 func (q *Queries) UpdateVoteOption(ctx context.Context, arg UpdateVoteOptionParams) (Vote, error) {

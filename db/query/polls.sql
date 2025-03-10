@@ -1,12 +1,12 @@
 -- name: CreatePoll :one
 INSERT INTO polls(
-    question,
+    description,
     created_by
 )
 VALUES (
     $1,
     $2
-) RETURNING id, question, created_by, is_active, created_at;
+) RETURNING id, description, created_by, is_active, created_at;
 
 -- name: DisablePoll :one
 UPDATE polls
