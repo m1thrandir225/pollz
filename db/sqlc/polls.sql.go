@@ -7,9 +7,9 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPoll = `-- name: CreatePoll :one
@@ -29,11 +29,11 @@ type CreatePollParams struct {
 }
 
 type CreatePollRow struct {
-	ID          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	CreatedBy   uuid.UUID `json:"created_by"`
-	IsActive    bool      `json:"is_active"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          uuid.UUID          `json:"id"`
+	Description string             `json:"description"`
+	CreatedBy   uuid.UUID          `json:"created_by"`
+	IsActive    bool               `json:"is_active"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreatePollRow, error) {
@@ -76,16 +76,16 @@ WHERE p.id=$1
 `
 
 type GetPollRow struct {
-	ID          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	IsActive    bool      `json:"is_active"`
-	CreatedBy   uuid.UUID `json:"created_by"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	ID_2        uuid.UUID `json:"id_2"`
-	PollID      uuid.UUID `json:"poll_id"`
-	OptionText  string    `json:"option_text"`
-	CreatedAt_2 time.Time `json:"created_at_2"`
+	ID          uuid.UUID          `json:"id"`
+	Description string             `json:"description"`
+	IsActive    bool               `json:"is_active"`
+	CreatedBy   uuid.UUID          `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	ID_2        uuid.UUID          `json:"id_2"`
+	PollID      uuid.UUID          `json:"poll_id"`
+	OptionText  string             `json:"option_text"`
+	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
 }
 
 func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error) {
