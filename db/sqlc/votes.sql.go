@@ -8,7 +8,7 @@ package db
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createVote = `-- name: CreateVote :one
@@ -27,10 +27,10 @@ VALUES (
 `
 
 type CreateVoteParams struct {
-	OptionID  uuid.UUID `json:"option_id"`
-	UserID    uuid.UUID `json:"user_id"`
-	IpAddress string    `json:"ip_address"`
-	UserAgent string    `json:"user_agent"`
+	OptionID  pgtype.UUID `json:"option_id"`
+	UserID    pgtype.UUID `json:"user_id"`
+	IpAddress string      `json:"ip_address"`
+	UserAgent string      `json:"user_agent"`
 }
 
 func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, error) {
@@ -58,7 +58,7 @@ WHERE id=$1
 RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
 `
 
-func (q *Queries) DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error) {
+func (q *Queries) DeleteVote(ctx context.Context, id pgtype.UUID) (Vote, error) {
 	row := q.db.QueryRow(ctx, deleteVote, id)
 	var i Vote
 	err := row.Scan(
@@ -79,7 +79,7 @@ WHERE id=$1
 LIMIT 1
 `
 
-func (q *Queries) GetVote(ctx context.Context, id uuid.UUID) (Vote, error) {
+func (q *Queries) GetVote(ctx context.Context, id pgtype.UUID) (Vote, error) {
 	row := q.db.QueryRow(ctx, getVote, id)
 	var i Vote
 	err := row.Scan(
@@ -101,8 +101,8 @@ RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
 `
 
 type UpdateVoteOptionParams struct {
-	ID       uuid.UUID `json:"id"`
-	OptionID uuid.UUID `json:"option_id"`
+	ID       pgtype.UUID `json:"id"`
+	OptionID pgtype.UUID `json:"option_id"`
 }
 
 func (q *Queries) UpdateVoteOption(ctx context.Context, arg UpdateVoteOptionParams) (Vote, error) {
