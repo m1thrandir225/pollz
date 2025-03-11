@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	db "m1thrandir225/cicd2025/db/sqlc"
 	"m1thrandir225/cicd2025/util"
 	"net/http"
@@ -30,6 +31,11 @@ type loginUserRequest struct {
 
 type refreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type refreshTokenResponse struct {
+	AccessTokenExpiresAt time.Time `json:"access_token_expires_at"`
+	AccessToken          string    `json:"access_token"`
 }
 
 func (server *Server) registerUser(ctx *gin.Context) {
@@ -133,6 +139,66 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
+
+	payload, err := getPayloadFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	user, err := server.store.GetUserDetails(ctx, payload.UserId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	accessToken, accessTokenPayload, err := server.tokenMaker.CreateToken(user.ID, server.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := refreshTokenResponse{
+		AccessTokenExpiresAt: accessTokenPayload.ExpiredAt,
+		AccessToken:          accessToken,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+
 }
 
-func (server *Server) getUser(ctx *gin.Context) {}
+func (server *Server) getUser(ctx *gin.Context) {
+	var req UriID
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	userId, err := uuid.Parse(req.ID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err = verifyUserIdWithToken(userId, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		return
+	}
+
+	user, err := server.store.GetUserDetails(ctx, userId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := db.CreateUserRow{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
