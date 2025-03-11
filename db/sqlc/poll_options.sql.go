@@ -8,7 +8,7 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createPollOption = `-- name: CreatePollOption :one
@@ -22,8 +22,8 @@ INSERT INTO poll_options(
 `
 
 type CreatePollOptionParams struct {
-	PollID     pgtype.UUID `json:"poll_id"`
-	OptionText string      `json:"option_text"`
+	PollID     uuid.UUID `json:"poll_id"`
+	OptionText string    `json:"option_text"`
 }
 
 func (q *Queries) CreatePollOption(ctx context.Context, arg CreatePollOptionParams) (PollOption, error) {
@@ -44,7 +44,7 @@ WHERE id = $1::uuid
 RETURNING id, poll_id, option_text, created_at
 `
 
-func (q *Queries) DeletePollOption(ctx context.Context, id pgtype.UUID) (PollOption, error) {
+func (q *Queries) DeletePollOption(ctx context.Context, id uuid.UUID) (PollOption, error) {
 	row := q.db.QueryRow(ctx, deletePollOption, id)
 	var i PollOption
 	err := row.Scan(
@@ -62,7 +62,7 @@ WHERE id=$1
 LIMIT 1
 `
 
-func (q *Queries) GetOption(ctx context.Context, id pgtype.UUID) (PollOption, error) {
+func (q *Queries) GetOption(ctx context.Context, id uuid.UUID) (PollOption, error) {
 	row := q.db.QueryRow(ctx, getOption, id)
 	var i PollOption
 	err := row.Scan(
@@ -82,8 +82,8 @@ RETURNING id, poll_id, option_text, created_at
 `
 
 type UpdatePollOptionParams struct {
-	ID         pgtype.UUID `json:"id"`
-	OptionText string      `json:"option_text"`
+	ID         uuid.UUID `json:"id"`
+	OptionText string    `json:"option_text"`
 }
 
 func (q *Queries) UpdatePollOption(ctx context.Context, arg UpdatePollOptionParams) (PollOption, error) {

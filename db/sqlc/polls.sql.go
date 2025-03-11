@@ -7,8 +7,9 @@ package db
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createPoll = `-- name: CreatePoll :one
@@ -23,16 +24,16 @@ VALUES (
 `
 
 type CreatePollParams struct {
-	Description string      `json:"description"`
-	CreatedBy   pgtype.UUID `json:"created_by"`
+	Description string    `json:"description"`
+	CreatedBy   uuid.UUID `json:"created_by"`
 }
 
 type CreatePollRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	Description string             `json:"description"`
-	CreatedBy   pgtype.UUID        `json:"created_by"`
-	IsActive    bool               `json:"is_active"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	CreatedBy   uuid.UUID `json:"created_by"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreatePollRow, error) {
@@ -54,7 +55,7 @@ WHERE id = $1
 RETURNING  id, description, is_active, created_by, created_at, updated_at
 `
 
-func (q *Queries) DeletePoll(ctx context.Context, id pgtype.UUID) (Poll, error) {
+func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 	row := q.db.QueryRow(ctx, deletePoll, id)
 	var i Poll
 	err := row.Scan(
@@ -75,19 +76,19 @@ WHERE p.id=$1
 `
 
 type GetPollRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	Description string             `json:"description"`
-	IsActive    bool               `json:"is_active"`
-	CreatedBy   pgtype.UUID        `json:"created_by"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	ID_2        pgtype.UUID        `json:"id_2"`
-	PollID      pgtype.UUID        `json:"poll_id"`
-	OptionText  string             `json:"option_text"`
-	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
+	CreatedBy   uuid.UUID `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	ID_2        uuid.UUID `json:"id_2"`
+	PollID      uuid.UUID `json:"poll_id"`
+	OptionText  string    `json:"option_text"`
+	CreatedAt_2 time.Time `json:"created_at_2"`
 }
 
-func (q *Queries) GetPoll(ctx context.Context, id pgtype.UUID) (GetPollRow, error) {
+func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error) {
 	row := q.db.QueryRow(ctx, getPoll, id)
 	var i GetPollRow
 	err := row.Scan(
@@ -144,9 +145,9 @@ RETURNING  id, description, is_active, created_by, created_at, updated_at
 `
 
 type UpdatePollParams struct {
-	ID          pgtype.UUID `json:"id"`
-	Description string      `json:"description"`
-	IsActive    bool        `json:"is_active"`
+	ID          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
 }
 
 func (q *Queries) UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, error) {
@@ -171,8 +172,8 @@ RETURNING id, description, is_active, created_by, created_at, updated_at
 `
 
 type UpdatePollStatusParams struct {
-	ID       pgtype.UUID `json:"id"`
-	IsActive bool        `json:"is_active"`
+	ID       uuid.UUID `json:"id"`
+	IsActive bool      `json:"is_active"`
 }
 
 func (q *Queries) UpdatePollStatus(ctx context.Context, arg UpdatePollStatusParams) (Poll, error) {

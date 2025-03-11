@@ -7,7 +7,7 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 type Querier interface {
@@ -15,16 +15,16 @@ type Querier interface {
 	CreatePollOption(ctx context.Context, arg CreatePollOptionParams) (PollOption, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, error)
-	DeletePoll(ctx context.Context, id pgtype.UUID) (Poll, error)
-	DeletePollOption(ctx context.Context, id pgtype.UUID) (PollOption, error)
-	DeleteUser(ctx context.Context, id pgtype.UUID) (DeleteUserRow, error)
-	DeleteVote(ctx context.Context, id pgtype.UUID) (Vote, error)
-	GetOption(ctx context.Context, id pgtype.UUID) (PollOption, error)
-	GetPoll(ctx context.Context, id pgtype.UUID) (GetPollRow, error)
+	DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error)
+	DeletePollOption(ctx context.Context, id uuid.UUID) (PollOption, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) (DeleteUserRow, error)
+	DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error)
+	GetOption(ctx context.Context, id uuid.UUID) (PollOption, error)
+	GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error)
 	GetPolls(ctx context.Context) ([]Poll, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
-	GetUserDetails(ctx context.Context, id pgtype.UUID) (User, error)
-	GetVote(ctx context.Context, id pgtype.UUID) (Vote, error)
+	GetUserDetails(ctx context.Context, id uuid.UUID) (User, error)
+	GetVote(ctx context.Context, id uuid.UUID) (Vote, error)
 	UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, error)
 	UpdatePollOption(ctx context.Context, arg UpdatePollOptionParams) (PollOption, error)
 	UpdatePollStatus(ctx context.Context, arg UpdatePollStatusParams) (Poll, error)
