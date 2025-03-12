@@ -1,0 +1,17 @@
+{
+  "name": "Pollz",
+  "version": "1.0.0",
+  "description": "Easy and fast polls with live statistics",
+  "scripts": {
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "backend:run": "cd backend && go run main.go",
+    "backend:build": "cd backend && go build -o ../bin/server main.go",
+    "start": "concurrently \"npm run backend:run\" \"npm run frontend:dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "author": "Sebastijan Zindl",
+  "license": "ISC"
+}

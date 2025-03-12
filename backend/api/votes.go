@@ -22,7 +22,7 @@ type DeleteVoteRequest struct {
 	UserID string `json:"user_id"`
 }
 
-func (server *Server) CreateVote(ctx *gin.Context) {
+func (server *Server) createVote(ctx *gin.Context) {
 	var req CreateVoteRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -57,7 +57,7 @@ func (server *Server) CreateVote(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newVote)
 }
 
-func (server *Server) UpdateVote(ctx *gin.Context) {
+func (server *Server) updateVote(ctx *gin.Context) {
 	var uriId UriID
 	var req UpdateVoteRequest
 
@@ -97,7 +97,7 @@ func (server *Server) UpdateVote(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updated)
 }
 
-func (server *Server) DeleteVote(ctx *gin.Context) {
+func (server *Server) deleteVote(ctx *gin.Context) {
 	var uriId UriID
 	var req DeleteVoteRequest
 
