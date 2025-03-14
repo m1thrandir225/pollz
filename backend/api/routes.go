@@ -19,7 +19,8 @@ func (server *Server) setupRouter() {
 
 	/** Poll Routes */
 	authRoutes.GET("/polls", server.getPolls)
-	authRoutes.GET("/poll/:id", server.getPoll)
+	v1.GET("/poll/:id", server.getPoll)
+
 	authRoutes.POST("/polls", server.createPoll)
 	authRoutes.PUT("/polls/:id", server.updatePoll)
 	authRoutes.PATCH("/polls/:id/status", server.updatePollStatus)
