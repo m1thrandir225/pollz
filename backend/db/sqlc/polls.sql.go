@@ -70,12 +70,32 @@ func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 }
 
 const getPoll = `-- name: GetPoll :one
-SELECT p.id, description, is_active, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
-JOIN public.poll_options po on p.id = po.poll_id
-WHERE p.id=$1
+SELECT id, description, is_active, created_by, created_at, updated_at FROM polls
+WHERE id = $1
+LIMIT 1
 `
 
-type GetPollRow struct {
+func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (Poll, error) {
+	row := q.db.QueryRow(ctx, getPoll, id)
+	var i Poll
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.IsActive,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPollWithOptions = `-- name: GetPollWithOptions :one
+SELECT p.id, description, is_active, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
+JOIN poll_options as po ON p.id = po.poll_id
+WHERE p.id = $1
+`
+
+type GetPollWithOptionsRow struct {
 	ID          uuid.UUID `json:"id"`
 	Description string    `json:"description"`
 	IsActive    bool      `json:"is_active"`
@@ -88,9 +108,9 @@ type GetPollRow struct {
 	CreatedAt_2 time.Time `json:"created_at_2"`
 }
 
-func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (GetPollRow, error) {
-	row := q.db.QueryRow(ctx, getPoll, id)
-	var i GetPollRow
+func (q *Queries) GetPollWithOptions(ctx context.Context, id uuid.UUID) (GetPollWithOptionsRow, error) {
+	row := q.db.QueryRow(ctx, getPollWithOptions, id)
+	var i GetPollWithOptionsRow
 	err := row.Scan(
 		&i.ID,
 		&i.Description,

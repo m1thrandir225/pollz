@@ -12,9 +12,14 @@ VALUES (
 SELECT * FROM polls;
 
 -- name: GetPoll :one
+SELECT * FROM polls
+WHERE id = $1
+LIMIT 1;
+
+-- name: GetPollWithOptions :one
 SELECT * FROM polls as p
-JOIN public.poll_options po on p.id = po.poll_id
-WHERE p.id=$1;
+JOIN poll_options as po ON p.id = po.poll_id
+WHERE p.id = $1;
 
 -- name: UpdatePoll :one
 UPDATE polls
