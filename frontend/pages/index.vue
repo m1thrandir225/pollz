@@ -6,7 +6,6 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: "Pollz",
   middleware: "auth",
 });
 </script>

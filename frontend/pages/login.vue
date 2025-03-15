@@ -1,23 +1,24 @@
+<!-- eslint-disable vue/html-self-closing -->
 <template>
-  <div class="w-full flex flex-col gap-8 items-start">
-    <h1 class="text-4xl font-bold font-mono">Login</h1>
+  <div class="flex flex-col items-start w-full gap-8">
+    <h1 class="font-mono text-4xl font-bold">Login</h1>
     <form
-      class="flex flex-col gap-4 items-center bg-neutral-100 p-8 rounded-md"
+      class="flex flex-col items-center gap-4 p-8 rounded-md bg-neutral-100"
       @submit="onSubmit"
     >
-      <div class="flex flex-col gap-2 items-start">
+      <div class="flex flex-col items-start gap-2">
         <label for="email">Email</label>
         <input
           id="email"
+          v-model="email"
           type="email"
           name="email"
-          v-model="email"
           v-bind="emailAttrs"
-          class="w-full bg-neutral-50 placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+          class="w-full px-3 py-2 text-sm transition duration-300 border rounded-md shadow-sm bg-neutral-50 placeholder:text-slate-400 text-slate-700 border-slate-200 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 focus:shadow"
         />
         <p v-if="errors.email" class="text-red-500">{{ errors.email }}</p>
       </div>
-      <div class="flex flex-col gap-2 items-start">
+      <div class="flex flex-col items-start gap-2">
         <label for="password">Password</label>
         <input
           id="password"
@@ -25,7 +26,7 @@
           type="password"
           name="password"
           v-bind="passwordAttrs"
-          class="w-full bg-neutral-50 placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+          class="w-full px-3 py-2 text-sm transition duration-300 border rounded-md shadow-sm bg-neutral-50 placeholder:text-slate-400 text-slate-700 border-slate-200 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 focus:shadow"
         />
         <p v-if="errors.password" class="text-red-500">{{ errors.password }}</p>
       </div>
@@ -43,6 +44,10 @@
 import * as zod from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
+
+definePageMeta({
+  middleware: "auth",
+});
 
 const schema = zod.object({
   email: zod.string().email(),
@@ -63,6 +68,22 @@ const onSubmit = handleSubmit(async (values) => {
     body: JSON.stringify(values),
   });
 
-  console.log(response);
+  const accessTokenCookie = useCookie("access", {
+    expires: new Date(response.access_token_expires_at),
+  });
+
+  accessTokenCookie.value = response.access_token;
+
+  const refreshTokenCookie = useCookie("refresh", {
+    expires: new Date(response.refresh_token_expires_at),
+  });
+
+  refreshTokenCookie.value = response.refresh_token;
+
+  const userCookie = useCookie("user", {
+    expires: new Date(response.refresh_token_expires_at),
+  });
+
+  userCookie.value = JSON.stringify(response.user);
 });
 </script>
