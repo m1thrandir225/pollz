@@ -45,6 +45,8 @@ import * as zod from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
+const authStore = useAuthStoreStore();
+
 definePageMeta({
   middleware: "auth",
 });
@@ -63,27 +65,15 @@ const [email, emailAttrs] = defineField("email");
 const [password, passwordAttrs] = defineField("password");
 
 const onSubmit = handleSubmit(async (values) => {
-  const response = await $fetch("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify(values),
-  });
+  try {
+    const response = await $fetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(values),
+    });
 
-  const accessTokenCookie = useCookie("access", {
-    expires: new Date(response.access_token_expires_at),
-  });
-
-  accessTokenCookie.value = response.access_token;
-
-  const refreshTokenCookie = useCookie("refresh", {
-    expires: new Date(response.refresh_token_expires_at),
-  });
-
-  refreshTokenCookie.value = response.refresh_token;
-
-  const userCookie = useCookie("user", {
-    expires: new Date(response.refresh_token_expires_at),
-  });
-
-  userCookie.value = JSON.stringify(response.user);
+    authStore.login(response);
+  } catch (error) {
+    console.error(error);
+  }
 });
 </script>
