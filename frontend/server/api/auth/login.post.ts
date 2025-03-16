@@ -1,5 +1,5 @@
-import {z} from "zod";
-import {apiUrl} from "~/api/config";
+import { z } from "zod";
+import { apiUrl } from "~/api/config";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -14,7 +14,7 @@ export type User = {
   created_at: string;
 };
 
-type LoginResponse = {
+export type LoginResponse = {
   user: User;
   access_token_expires_at: string;
   access_token: string;
@@ -29,14 +29,14 @@ export default defineEventHandler(async (event) => {
     throw body.error.issues;
   }
 
-  const {email, password} = body.data;
+  const { email, password } = body.data;
 
   const response = await fetch(`${apiUrl}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({email, password}),
+    body: JSON.stringify({ email, password }),
   });
 
   const data = await response.json();
