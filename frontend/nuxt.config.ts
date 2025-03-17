@@ -12,4 +12,12 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
   ],
+  imports: {
+    presets: [
+      {
+        from: "@boringer-avatars/vue3",
+        imports: ["Avatar"],
+      },
+    ],
+  },
 });

@@ -1,7 +1,7 @@
 import type { LoginResponse, User } from "~/server/api/auth/login.post";
 import type { RefreshTokenResponse } from "~/server/api/auth/refresh-token.post";
 
-export const useAuthStoreStore = defineStore(
+export const useAuthStore = defineStore(
   "auth",
   () => {
     const accessToken = ref<string | null>(null);
@@ -37,6 +37,14 @@ export const useAuthStoreStore = defineStore(
       refreshTokenExpiresAt.value = new Date(response.refresh_token_expires_at);
 
       user.value = response.user;
+
+      console.log(
+        accessToken,
+        accessTokenExpiresAt,
+        refreshToken,
+        refreshTokenExpiresAt,
+        user,
+      );
     }
 
     function logout() {
@@ -69,9 +77,7 @@ export const useAuthStoreStore = defineStore(
   },
   {
     persist: {
-      storage: piniaPluginPersistedstate.cookies({
-        httpOnly: true,
-      }),
+      storage: piniaPluginPersistedstate.cookies({}),
     },
-  }
+  },
 );

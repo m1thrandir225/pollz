@@ -3,15 +3,7 @@
     class="flex flex-col items-center justify-center w-full min-h-screen gap-8"
   >
     <div class="flex flex-col items-start gap-4">
-      <NuxtLink
-        to="/"
-        class="w-full font-mono font-bold text-center transition-all duration-150 ease-in-out group hover:text-orange-600 text-8xl text-neutral-900 dark:text-neutral-100"
-      >
-        Po<span
-          class="text-orange-600 transition-all duration-150 ease-in-out group-hover:text-neutral-900 hover:dark:text-neutral-100"
-          >ll</span
-        >z
-      </NuxtLink>
+      <ProjectLogo />
       <p class="font-mono text-xl text-black dark:text-white">
         Easy fast polls with real-time updates
       </p>
@@ -33,7 +25,11 @@
 </template>
 
 <script setup lang="ts">
-const authStore = useAuthStoreStore();
+const authStore = useAuthStore();
+
+useSeoMeta({
+  title: "Pollz",
+});
 
 definePageMeta({
   middleware: "auth",
