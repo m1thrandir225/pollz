@@ -1,12 +1,14 @@
 -- name: CreatePoll :one
 INSERT INTO polls(
     description,
-    created_by
+    created_by,
+    active_until
 )
 VALUES (
     $1,
-    $2
-) RETURNING id, description, created_by, is_active, created_at;
+    $2,
+    $3
+) RETURNING *;
 
 -- name: GetPolls :many
 SELECT * FROM polls;
@@ -23,13 +25,13 @@ WHERE p.id = $1;
 
 -- name: UpdatePoll :one
 UPDATE polls
-SET description=$2, is_active=$3
+SET description=$2, active_until=$3
 WHERE id = $1
 RETURNING  *;
 
 -- name: UpdatePollStatus :one
 UPDATE polls
-SET is_active=$2
+SET active_until=$2
 WHERE id = $1
 RETURNING *;
 

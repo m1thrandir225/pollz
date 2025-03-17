@@ -2,18 +2,23 @@ package db
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"m1thrandir225/cicd2025/util"
 	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
-func createRandomPoll(t *testing.T, userId uuid.UUID) CreatePollRow {
+func createRandomPoll(t *testing.T, userId uuid.UUID) Poll {
 	pollDescription := util.RandomString(120)
+
+	activeTime := time.Now()
 
 	args := CreatePollParams{
 		Description: pollDescription,
 		CreatedBy:   userId,
+		ActiveUntil: activeTime,
 	}
 	poll, err := testStore.CreatePoll(context.Background(), args)
 
@@ -21,6 +26,7 @@ func createRandomPoll(t *testing.T, userId uuid.UUID) CreatePollRow {
 	require.NotEmpty(t, poll)
 	require.Equal(t, pollDescription, poll.Description)
 	require.Equal(t, userId, poll.CreatedBy)
+	require.WithinDuration(t, poll.ActiveUntil, activeTime, time.Second)
 	require.NotZero(t, poll.CreatedAt)
 
 	return poll
@@ -60,6 +66,7 @@ func TestGetPoll(t *testing.T) {
 	require.Equal(t, poll.CreatedBy, result.CreatedBy)
 	require.Equal(t, poll.CreatedAt, result.CreatedAt)
 	require.Equal(t, poll.Description, result.Description)
+	require.WithinDuration(t, poll.ActiveUntil, result.ActiveUntil, time.Microsecond)
 }
 
 func TestUpdatePoll(t *testing.T) {
@@ -68,10 +75,11 @@ func TestUpdatePoll(t *testing.T) {
 
 	newDescription := util.RandomString(120)
 
+	newActiveTime := time.Now().Add(time.Hour * 24 * 7)
 	updateArgs := UpdatePollParams{
 		ID:          poll.ID,
 		Description: newDescription,
-		IsActive:    true,
+		ActiveUntil: newActiveTime,
 	}
 	result, err := testStore.UpdatePoll(context.Background(), updateArgs)
 	require.NoError(t, err)
@@ -80,19 +88,20 @@ func TestUpdatePoll(t *testing.T) {
 	require.Equal(t, poll.ID, result.ID)
 	require.Equal(t, newDescription, result.Description)
 	require.NotEqual(t, poll.Description, result.Description)
-	require.Equal(t, poll.IsActive, result.IsActive)
+	require.WithinDuration(t, result.ActiveUntil, newActiveTime, time.Second)
+	require.NotEqual(t, poll.ActiveUntil, result.ActiveUntil)
 	require.Equal(t, poll.CreatedBy, result.CreatedBy)
 	require.Equal(t, poll.CreatedAt, result.CreatedAt)
-
 }
 
 func TestUpdatePollStatus(t *testing.T) {
 	user := createRandomUser(t)
 	poll := createRandomPoll(t, user.ID)
 
+	newActiveTime := time.Now()
 	args := UpdatePollStatusParams{
-		ID:       poll.ID,
-		IsActive: false,
+		ID:          poll.ID,
+		ActiveUntil: newActiveTime,
 	}
 
 	result, err := testStore.UpdatePollStatus(context.Background(), args)
@@ -101,13 +110,14 @@ func TestUpdatePollStatus(t *testing.T) {
 	require.Equal(t, poll.ID, result.ID)
 	require.Equal(t, user.ID, poll.CreatedBy)
 	require.Equal(t, poll.CreatedAt, poll.CreatedAt)
-	require.NotEqual(t, poll.IsActive, result.IsActive)
+	require.NotEqual(t, poll.ActiveUntil, result.ActiveUntil)
+	require.WithinDuration(t, result.ActiveUntil, newActiveTime, time.Microsecond)
 	require.Equal(t, poll.CreatedBy, result.CreatedBy)
 }
 
 func TestGetPolls(t *testing.T) {
 	user := createRandomUser(t)
-	poll_arr := make([]CreatePollRow, 0)
+	poll_arr := make([]Poll, 0)
 	for i := 0; i < 10; i++ {
 		poll := createRandomPoll(t, user.ID)
 		poll_arr = append(poll_arr, poll)

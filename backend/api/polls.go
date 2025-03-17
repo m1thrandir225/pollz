@@ -1,10 +1,12 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	db "m1thrandir225/cicd2025/db/sqlc"
 	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type CreatePollRequest struct {
@@ -15,10 +17,11 @@ type CreatePollRequest struct {
 type UpdatePollRequest struct {
 	Description string `json:"description" binding:"required"`
 	Status      *bool  `json:"status" binding:"required"`
+	ActiveUntil string `json:"active_until" binding:"required"`
 }
 
 type UpdatePollStatusRequest struct {
-	Status *bool `json:"status" binding:"required"`
+	ActiveUntil string `json:"active_until" binding:"required"`
 }
 
 type DeletePollRequest struct {
@@ -103,10 +106,16 @@ func (server *Server) updatePoll(ctx *gin.Context) {
 		return
 	}
 
+	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
 	args := db.UpdatePollParams{
 		ID:          pollId,
 		Description: req.Description,
-		IsActive:    *req.Status,
+		ActiveUntil: activeTime,
 	}
 
 	updated, err := server.store.UpdatePoll(ctx, args)
@@ -116,7 +125,6 @@ func (server *Server) updatePoll(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, updated)
-
 }
 
 func (server *Server) updatePollStatus(ctx *gin.Context) {
@@ -139,10 +147,15 @@ func (server *Server) updatePollStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
 	args := db.UpdatePollStatusParams{
-		ID:       pollId,
-		IsActive: *req.Status,
+		ID:          pollId,
+		ActiveUntil: activeTime,
 	}
 
 	updated, err := server.store.UpdatePollStatus(ctx, args)

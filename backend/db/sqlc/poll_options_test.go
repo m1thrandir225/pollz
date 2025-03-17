@@ -2,10 +2,11 @@ package db
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"m1thrandir225/cicd2025/util"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
 func createRandomPollOption(t *testing.T, pollId uuid.UUID) PollOption {

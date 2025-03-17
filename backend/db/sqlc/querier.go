@@ -11,7 +11,7 @@ import (
 )
 
 type Querier interface {
-	CreatePoll(ctx context.Context, arg CreatePollParams) (CreatePollRow, error)
+	CreatePoll(ctx context.Context, arg CreatePollParams) (Poll, error)
 	CreatePollOption(ctx context.Context, arg CreatePollOptionParams) (PollOption, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, error)

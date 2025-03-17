@@ -2,10 +2,13 @@ package api
 
 import (
 	"errors"
+	"m1thrandir225/cicd2025/token"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"m1thrandir225/cicd2025/token"
 )
+
+const UtcDateFormat = "2006-01-02T15:04:05.000Z"
 
 type UriID struct {
 	ID string `uri:"id" binding:"required"`

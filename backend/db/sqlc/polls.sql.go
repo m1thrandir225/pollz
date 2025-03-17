@@ -15,36 +15,32 @@ import (
 const createPoll = `-- name: CreatePoll :one
 INSERT INTO polls(
     description,
-    created_by
+    created_by,
+    active_until
 )
 VALUES (
     $1,
-    $2
-) RETURNING id, description, created_by, is_active, created_at
+    $2,
+    $3
+) RETURNING id, description, active_until, created_by, created_at, updated_at
 `
 
 type CreatePollParams struct {
 	Description string    `json:"description"`
 	CreatedBy   uuid.UUID `json:"created_by"`
+	ActiveUntil time.Time `json:"active_until"`
 }
 
-type CreatePollRow struct {
-	ID          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	CreatedBy   uuid.UUID `json:"created_by"`
-	IsActive    bool      `json:"is_active"`
-	CreatedAt   time.Time `json:"created_at"`
-}
-
-func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreatePollRow, error) {
-	row := q.db.QueryRow(ctx, createPoll, arg.Description, arg.CreatedBy)
-	var i CreatePollRow
+func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (Poll, error) {
+	row := q.db.QueryRow(ctx, createPoll, arg.Description, arg.CreatedBy, arg.ActiveUntil)
+	var i Poll
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
+		&i.ActiveUntil,
 		&i.CreatedBy,
-		&i.IsActive,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -52,7 +48,7 @@ func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) (CreateP
 const deletePoll = `-- name: DeletePoll :one
 DELETE FROM polls
 WHERE id = $1
-RETURNING  id, description, is_active, created_by, created_at, updated_at
+RETURNING  id, description, active_until, created_by, created_at, updated_at
 `
 
 func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
@@ -61,7 +57,7 @@ func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
-		&i.IsActive,
+		&i.ActiveUntil,
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -70,7 +66,7 @@ func (q *Queries) DeletePoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 }
 
 const getPoll = `-- name: GetPoll :one
-SELECT id, description, is_active, created_by, created_at, updated_at FROM polls
+SELECT id, description, active_until, created_by, created_at, updated_at FROM polls
 WHERE id = $1
 LIMIT 1
 `
@@ -81,7 +77,7 @@ func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
-		&i.IsActive,
+		&i.ActiveUntil,
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -90,7 +86,7 @@ func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 }
 
 const getPollWithOptions = `-- name: GetPollWithOptions :one
-SELECT p.id, description, is_active, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
+SELECT p.id, description, active_until, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
 JOIN poll_options as po ON p.id = po.poll_id
 WHERE p.id = $1
 `
@@ -98,7 +94,7 @@ WHERE p.id = $1
 type GetPollWithOptionsRow struct {
 	ID          uuid.UUID `json:"id"`
 	Description string    `json:"description"`
-	IsActive    bool      `json:"is_active"`
+	ActiveUntil time.Time `json:"active_until"`
 	CreatedBy   uuid.UUID `json:"created_by"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -114,7 +110,7 @@ func (q *Queries) GetPollWithOptions(ctx context.Context, id uuid.UUID) (GetPoll
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
-		&i.IsActive,
+		&i.ActiveUntil,
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -127,7 +123,7 @@ func (q *Queries) GetPollWithOptions(ctx context.Context, id uuid.UUID) (GetPoll
 }
 
 const getPolls = `-- name: GetPolls :many
-SELECT id, description, is_active, created_by, created_at, updated_at FROM polls
+SELECT id, description, active_until, created_by, created_at, updated_at FROM polls
 `
 
 func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
@@ -142,7 +138,7 @@ func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Description,
-			&i.IsActive,
+			&i.ActiveUntil,
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -159,24 +155,24 @@ func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
 
 const updatePoll = `-- name: UpdatePoll :one
 UPDATE polls
-SET description=$2, is_active=$3
+SET description=$2, active_until=$3
 WHERE id = $1
-RETURNING  id, description, is_active, created_by, created_at, updated_at
+RETURNING  id, description, active_until, created_by, created_at, updated_at
 `
 
 type UpdatePollParams struct {
 	ID          uuid.UUID `json:"id"`
 	Description string    `json:"description"`
-	IsActive    bool      `json:"is_active"`
+	ActiveUntil time.Time `json:"active_until"`
 }
 
 func (q *Queries) UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, error) {
-	row := q.db.QueryRow(ctx, updatePoll, arg.ID, arg.Description, arg.IsActive)
+	row := q.db.QueryRow(ctx, updatePoll, arg.ID, arg.Description, arg.ActiveUntil)
 	var i Poll
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
-		&i.IsActive,
+		&i.ActiveUntil,
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -186,23 +182,23 @@ func (q *Queries) UpdatePoll(ctx context.Context, arg UpdatePollParams) (Poll, e
 
 const updatePollStatus = `-- name: UpdatePollStatus :one
 UPDATE polls
-SET is_active=$2
+SET active_until=$2
 WHERE id = $1
-RETURNING id, description, is_active, created_by, created_at, updated_at
+RETURNING id, description, active_until, created_by, created_at, updated_at
 `
 
 type UpdatePollStatusParams struct {
-	ID       uuid.UUID `json:"id"`
-	IsActive bool      `json:"is_active"`
+	ID          uuid.UUID `json:"id"`
+	ActiveUntil time.Time `json:"active_until"`
 }
 
 func (q *Queries) UpdatePollStatus(ctx context.Context, arg UpdatePollStatusParams) (Poll, error) {
-	row := q.db.QueryRow(ctx, updatePollStatus, arg.ID, arg.IsActive)
+	row := q.db.QueryRow(ctx, updatePollStatus, arg.ID, arg.ActiveUntil)
 	var i Poll
 	err := row.Scan(
 		&i.ID,
 		&i.Description,
-		&i.IsActive,
+		&i.ActiveUntil,
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,

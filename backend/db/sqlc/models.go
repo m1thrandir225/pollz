@@ -13,7 +13,7 @@ import (
 type Poll struct {
 	ID          uuid.UUID `json:"id"`
 	Description string    `json:"description"`
-	IsActive    bool      `json:"is_active"`
+	ActiveUntil time.Time `json:"active_until"`
 	CreatedBy   uuid.UUID `json:"created_by"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
