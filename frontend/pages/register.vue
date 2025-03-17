@@ -89,12 +89,12 @@
       </div>
       <button
         type="submit"
-        class="w-full bg-orange-600 dark:text-neutral-100 text-neutral-900 px-8 py-2 rounded-md border border-transparent hover:border-neutral-900 dark:hover:border-neutral-100 transition-all ease-in-out duration-100"
+        class="w-full bg-orange-600 dark:text-neutral-100 text-neutral-900 px-8 py-2 border border-transparent hover:border-neutral-900 dark:hover:border-neutral-100 transition-all ease-in-out duration-100"
       >
         Continue
       </button>
     </form>
-    <p class="font-mono">
+    <p class="font-mono text-neutral-900 dark:text-neutral-100">
       Already have an account?
       <NuxtLink to="/login" class="text-orange-600 font-bold">Login</NuxtLink>
     </p>

@@ -2,12 +2,6 @@
   <div
     class="flex flex-col items-center justify-center w-full min-h-screen gap-8"
   >
-    <div class="flex flex-col items-start gap-4">
-      <ProjectLogo />
-      <p class="font-mono text-xl text-black dark:text-white">
-        Easy fast polls with real-time updates
-      </p>
-    </div>
     <NuxtLink
       v-if="!authStore.isAuthenticated"
       to="/login"
