@@ -106,6 +106,7 @@ import * as z from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
+const authStore = useAuthStore();
 useSeoMeta({
   title: "Register | Pollz",
 });
@@ -134,12 +135,13 @@ const [lastName, lastNameAttrs] = defineField("lastName");
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    const response = $fetch("/api/auth/register", {
+    const response = await $fetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(values),
     });
 
-    console.log(response);
+    authStore.login(response);
+    return navigateTo("/");
   } catch (error) {
     console.error(error);
   }

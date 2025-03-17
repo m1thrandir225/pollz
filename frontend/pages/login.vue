@@ -102,6 +102,8 @@ const onSubmit = handleSubmit(async (values) => {
     });
 
     authStore.login(response);
+
+    return navigateTo("/");
   } catch (error) {
     console.error(error);
   }
