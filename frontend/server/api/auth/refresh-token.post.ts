@@ -3,6 +3,7 @@ import * as z from "zod";
 
 const refreshTokenSchema = z.object({
   refresh_token: z.string(),
+  user_id: z.string(),
 });
 
 export type RefreshTokenResponse = {
@@ -28,7 +29,11 @@ export default defineEventHandler(async (event) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || response.statusText);
+    throw createError({
+      status: response.status,
+      statusMessage: response.statusText,
+      message: data.error,
+    });
   }
 
   return data as RefreshTokenResponse;

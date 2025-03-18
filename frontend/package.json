@@ -28,6 +28,7 @@
   "devDependencies": {
     "@pinia/nuxt": "^0.10.1",
     "@vueuse/core": "^13.0.0",
-    "@vueuse/nuxt": "^13.0.0"
+    "@vueuse/nuxt": "^13.0.0",
+    "typescript": "^5.8.2"
   }
 }

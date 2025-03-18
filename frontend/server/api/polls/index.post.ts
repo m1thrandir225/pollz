@@ -23,13 +23,14 @@ export default defineEventHandler(async (event) => {
       message: "Missing bearer token",
     });
   }
+
   const response = await fetch(`${apiUrl}/polls`, {
     method: "POST",
     headers: {
       Authorization: authToken,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body.data),
   });
 
   const data = await response.json();

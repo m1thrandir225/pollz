@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center w-full gap-8 min-h-[800px]"
+    class="flex flex-col items-center justify-center w-full gap-8 min-h-[650px]"
   >
     <h1
       class="font-mono text-4xl font-bold text-neutral-900 dark:text-neutral-100"

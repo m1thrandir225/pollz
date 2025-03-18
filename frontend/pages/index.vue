@@ -1,25 +1,21 @@
 <template>
-  <div
-    class="flex flex-col items-center justify-center w-full min-h-screen gap-8"
-  >
-    <NuxtLink
-      v-if="!authStore.isAuthenticated"
-      to="/login"
-      class="px-8 py-2 italic font-light text-white transition-all duration-100 ease-in-out bg-black border-2 rounded-sm hover:text-orange-600 hover:font-normal dark:bg-white dark:text-black hover:border-orange-400"
-      >Get Started</NuxtLink
-    >
-    <NuxtLink
-      v-else
-      to="/create-poll"
-      class="px-8 py-2 italic font-light text-white transition-all duration-100 ease-in-out bg-black border-2 rounded-sm hover:text-orange-600 hover:font-normal dark:bg-white dark:text-black hover:border-orange-400"
-    >
-      Create a poll
-    </NuxtLink>
+  <div class="flex flex-col items-center w-full my-8 gap-8 overflow-hidden">
+    <PollList v-if="data" :list="data" />
   </div>
 </template>
-
 <script setup lang="ts">
+import PollList from "~/components/polls/PollList.vue";
+
 const authStore = useAuthStore();
+
+const { data, refresh, clear, error } = useAsyncData("user-polls", () =>
+  $fetch("/api/polls", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${authStore.accessToken}`,
+    },
+  }),
+);
 
 useSeoMeta({
   title: "Pollz",
