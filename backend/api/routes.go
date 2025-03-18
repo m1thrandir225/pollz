@@ -10,7 +10,7 @@ func (server *Server) setupRouter() {
 	/** Public Routes */
 	v1.POST("/login", server.loginUser)
 	v1.POST("/register", server.registerUser)
-	v1.POST("/refreshToken", server.refreshToken)
+	v1.POST("/refresh-token", server.refreshToken)
 
 	authRoutes := v1.Group("/").Use(authMiddleware(server.tokenMaker))
 
@@ -18,8 +18,9 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/user/:id", server.getUser)
 
 	/** Poll Routes */
-	authRoutes.GET("/polls", server.getPolls)
-	v1.GET("/poll/:id", server.getPoll)
+
+	authRoutes.GET("/polls", server.getPolls) // Get your polls
+	v1.GET("/polls/:id", server.getPoll)
 
 	authRoutes.POST("/polls", server.createPoll)
 	authRoutes.PUT("/polls/:id", server.updatePoll)

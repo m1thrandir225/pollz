@@ -14,8 +14,9 @@ import (
 )
 
 type CreatePollRequest struct {
-	Description string `json:"description" binding:"required"`
-	ActiveUntil string `json:"active_until" binding:"required"`
+	Description string   `json:"description" binding:"required"`
+	ActiveUntil string   `json:"active_until" binding:"required"`
+	Options     []string `json:"options" binding:"required"`
 }
 
 type GetPollResponse struct {
@@ -43,7 +44,7 @@ func (server *Server) createPoll(ctx *gin.Context) {
 
 	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(errors.New("active_until format mismatch")))
 		return
 	}
 
@@ -51,11 +52,10 @@ func (server *Server) createPoll(ctx *gin.Context) {
 	* The active time for the new poll cannot be in the past
 	 */
 
-	if util.DateBefore(time.Now(), activeTime) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "poll active time must be in the future"})
+	if !util.DateBefore(time.Now().UTC(), activeTime.UTC()) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "poll active time must be in the future"})
 		return
 	}
-
 	/**
 	* Get the userID from the current active payload context
 	 */
@@ -76,7 +76,24 @@ func (server *Server) createPoll(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+
+	optionArgs := db.CreateMultipleOptionsParams{
+		PollID:      result.ID,
+		OptionTexts: req.Options,
+	}
+
+	options, err := server.store.CreateMultipleOptions(ctx, optionArgs)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := GetPollResponse{
+		Poll:    result,
+		Options: options,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (server *Server) getPolls(ctx *gin.Context) {
@@ -113,6 +130,10 @@ func (server *Server) getPoll(ctx *gin.Context) {
 
 	poll, err := server.store.GetPoll(ctx, pollId)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

@@ -11,6 +11,46 @@ import (
 	"github.com/google/uuid"
 )
 
+const createMultipleOptions = `-- name: CreateMultipleOptions :many
+INSERT INTO poll_options(
+  poll_id,
+  option_text
+) VALUES (
+  $1::uuid,
+  unnest($2::text[])
+) RETURNING id, poll_id, option_text, created_at
+`
+
+type CreateMultipleOptionsParams struct {
+	PollID      uuid.UUID `json:"poll_id"`
+	OptionTexts []string  `json:"option_texts"`
+}
+
+func (q *Queries) CreateMultipleOptions(ctx context.Context, arg CreateMultipleOptionsParams) ([]PollOption, error) {
+	rows, err := q.db.Query(ctx, createMultipleOptions, arg.PollID, arg.OptionTexts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PollOption{}
+	for rows.Next() {
+		var i PollOption
+		if err := rows.Scan(
+			&i.ID,
+			&i.PollID,
+			&i.OptionText,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createPollOption = `-- name: CreatePollOption :one
 INSERT INTO poll_options(
     poll_id,

@@ -123,8 +123,8 @@ func TestGetPolls(t *testing.T) {
 		poll_arr = append(poll_arr, poll)
 	}
 
-	polls, err := testStore.GetPolls(context.Background())
+	polls, err := testStore.GetPolls(context.Background(), user.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, polls)
-	require.GreaterOrEqual(t, len(polls), len(poll_arr))
+	require.Equal(t, len(poll_arr), len(polls))
 }

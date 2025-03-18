@@ -2,17 +2,17 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"m1thrandir225/cicd2025/util"
 	"os"
 	"testing"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var testStore Store
 
 func TestMain(m *testing.M) {
-
 	config, err := util.LoadConfig("../../")
 	if err != nil {
 		log.Fatal("cannot load config:", err)

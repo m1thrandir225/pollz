@@ -1,12 +1,13 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	db "m1thrandir225/cicd2025/db/sqlc"
 	"m1thrandir225/cicd2025/util"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type RegisterUserRequest struct {
@@ -31,6 +32,7 @@ type loginUserRequest struct {
 
 type refreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
+	UserId       string `json:"user_id" binding:"required,uuid"`
 }
 
 type refreshTokenResponse struct {
@@ -131,7 +133,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
-
 }
 
 func (server *Server) refreshToken(ctx *gin.Context) {
@@ -139,14 +140,13 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
-
-	payload, err := getPayloadFromContext(ctx)
+	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	user, err := server.store.GetUserDetails(ctx, payload.UserId)
+	user, err := server.store.GetUserDetails(ctx, userId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -164,7 +164,6 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
-
 }
 
 func (server *Server) getUser(ctx *gin.Context) {

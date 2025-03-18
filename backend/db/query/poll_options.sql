@@ -7,6 +7,16 @@ INSERT INTO poll_options(
     sqlc.arg(option_text)::text
 ) RETURNING *;
 
+
+-- name: CreateMultipleOptions :many 
+INSERT INTO poll_options(
+  poll_id,
+  option_text
+) VALUES (
+  sqlc.arg(poll_id)::uuid,
+  unnest(sqlc.arg(option_texts)::text[])
+) RETURNING *;
+
 -- name: GetOption :one
 SELECT * FROM poll_options
 WHERE id=$1
