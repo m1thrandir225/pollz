@@ -9,6 +9,11 @@
 
       <p>{{ formatDate(new Date(data.poll.active_until)) }}</p>
     </div>
+    <div>
+      <div v-for="option in data.options" :key="option.id">
+        {{ option.option_text }}
+      </div>
+    </div>
   </div>
   <div v-else>Error...</div>
 </template>

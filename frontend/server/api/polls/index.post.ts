@@ -1,11 +1,11 @@
 import * as z from "zod";
 import { apiUrl } from "~/api/config";
-import type { Poll } from "~/types/poll";
+import type { PollWithOptions } from "~/types/poll";
 
 const schema = z.object({
   description: z.string(),
-  user_id: z.string(),
   active_until: z.string(),
+  options: z.array(z.string()),
 });
 
 export default defineEventHandler(async (event) => {
@@ -43,5 +43,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return data as Poll;
+  return data as PollWithOptions;
 });
