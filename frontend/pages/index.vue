@@ -8,7 +8,7 @@ import PollList from "~/components/polls/PollList.vue";
 
 const authStore = useAuthStore();
 
-const { data, refresh, clear, error } = useAsyncData("user-polls", () =>
+const { data, refresh, clear, error, status } = useAsyncData("user-polls", () =>
   $fetch("/api/polls", {
     method: "GET",
     headers: {
@@ -16,6 +16,10 @@ const { data, refresh, clear, error } = useAsyncData("user-polls", () =>
     },
   }),
 );
+
+if (error.value) {
+  throw error;
+}
 
 useSeoMeta({
   title: "Pollz",

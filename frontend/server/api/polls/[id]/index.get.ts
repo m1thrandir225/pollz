@@ -11,14 +11,15 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  const data = await response.json();
   if (!response.ok) {
     throw createError({
       status: response.status,
       statusMessage: response.statusText,
-      message: data.error,
+      message: response.statusText,
     });
   }
+
+  const data = await response.json();
 
   return data as PollWithOptions;
 });
