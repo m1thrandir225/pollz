@@ -74,6 +74,36 @@ func (q *Queries) GetOption(ctx context.Context, id uuid.UUID) (PollOption, erro
 	return i, err
 }
 
+const getOptionsForPoll = `-- name: GetOptionsForPoll :many
+SELECT id, poll_id, option_text, created_at FROM poll_options
+WHERE poll_id = $1
+`
+
+func (q *Queries) GetOptionsForPoll(ctx context.Context, pollID uuid.UUID) ([]PollOption, error) {
+	rows, err := q.db.Query(ctx, getOptionsForPoll, pollID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PollOption{}
+	for rows.Next() {
+		var i PollOption
+		if err := rows.Scan(
+			&i.ID,
+			&i.PollID,
+			&i.OptionText,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updatePollOption = `-- name: UpdatePollOption :one
 UPDATE poll_options
 SET option_text=$2

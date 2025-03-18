@@ -85,49 +85,13 @@ func (q *Queries) GetPoll(ctx context.Context, id uuid.UUID) (Poll, error) {
 	return i, err
 }
 
-const getPollWithOptions = `-- name: GetPollWithOptions :one
-SELECT p.id, description, active_until, created_by, p.created_at, updated_at, po.id, poll_id, option_text, po.created_at FROM polls as p
-JOIN poll_options as po ON p.id = po.poll_id
-WHERE p.id = $1
-`
-
-type GetPollWithOptionsRow struct {
-	ID          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	ActiveUntil time.Time `json:"active_until"`
-	CreatedBy   uuid.UUID `json:"created_by"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	ID_2        uuid.UUID `json:"id_2"`
-	PollID      uuid.UUID `json:"poll_id"`
-	OptionText  string    `json:"option_text"`
-	CreatedAt_2 time.Time `json:"created_at_2"`
-}
-
-func (q *Queries) GetPollWithOptions(ctx context.Context, id uuid.UUID) (GetPollWithOptionsRow, error) {
-	row := q.db.QueryRow(ctx, getPollWithOptions, id)
-	var i GetPollWithOptionsRow
-	err := row.Scan(
-		&i.ID,
-		&i.Description,
-		&i.ActiveUntil,
-		&i.CreatedBy,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.ID_2,
-		&i.PollID,
-		&i.OptionText,
-		&i.CreatedAt_2,
-	)
-	return i, err
-}
-
 const getPolls = `-- name: GetPolls :many
 SELECT id, description, active_until, created_by, created_at, updated_at FROM polls
+WHERE created_by = $1
 `
 
-func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
-	rows, err := q.db.Query(ctx, getPolls)
+func (q *Queries) GetPolls(ctx context.Context, createdBy uuid.UUID) ([]Poll, error) {
+	rows, err := q.db.Query(ctx, getPolls, createdBy)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +115,26 @@ func (q *Queries) GetPolls(ctx context.Context) ([]Poll, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const isPollActive = `-- name: IsPollActive :one
+SELECT id, description, active_until, created_by, created_at, updated_at FROM polls as p 
+WHERE p.active_until > now() AND p.id = $1
+LIMIT 1
+`
+
+func (q *Queries) IsPollActive(ctx context.Context, id uuid.UUID) (Poll, error) {
+	row := q.db.QueryRow(ctx, isPollActive, id)
+	var i Poll
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.ActiveUntil,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updatePoll = `-- name: UpdatePoll :one

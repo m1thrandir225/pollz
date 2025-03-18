@@ -1,17 +1,26 @@
 package api
 
 import (
+	"context"
+	"errors"
 	db "m1thrandir225/cicd2025/db/sqlc"
+	"m1thrandir225/cicd2025/util"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type CreatePollRequest struct {
 	Description string `json:"description" binding:"required"`
-	UserID      string `json:"user_id" binding:"required,uuid"`
+	ActiveUntil string `json:"active_until" binding:"required"`
+}
+
+type GetPollResponse struct {
+	Poll    db.Poll         `json:"poll"`
+	Options []db.PollOption `json:"options"`
 }
 
 type UpdatePollRequest struct {
@@ -24,10 +33,6 @@ type UpdatePollStatusRequest struct {
 	ActiveUntil string `json:"active_until" binding:"required"`
 }
 
-type DeletePollRequest struct {
-	UserID string `json:"user_id" binding:"required,uuid"`
-}
-
 func (server *Server) createPoll(ctx *gin.Context) {
 	var req CreatePollRequest
 
@@ -36,15 +41,34 @@ func (server *Server) createPoll(ctx *gin.Context) {
 		return
 	}
 
-	userId, err := uuid.Parse(req.UserID)
+	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	/**
+	* The active time for the new poll cannot be in the past
+	 */
+
+	if util.DateBefore(time.Now(), activeTime) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "poll active time must be in the future"})
+		return
+	}
+
+	/**
+	* Get the userID from the current active payload context
+	 */
+	payload, err := getPayloadFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	args := db.CreatePollParams{
 		Description: req.Description,
-		CreatedBy:   userId,
+		CreatedBy:   payload.UserId,
+		ActiveUntil: activeTime,
 	}
 
 	result, err := server.store.CreatePoll(ctx, args)
@@ -56,8 +80,18 @@ func (server *Server) createPoll(ctx *gin.Context) {
 }
 
 func (server *Server) getPolls(ctx *gin.Context) {
-	polls, err := server.store.GetPolls(ctx)
+	payload, err := getPayloadFromContext(ctx)
 	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	polls, err := server.store.GetPolls(ctx, payload.UserId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -83,7 +117,18 @@ func (server *Server) getPoll(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, poll)
+	options, err := server.store.GetOptionsForPoll(context.Background(), poll.ID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+		}
+	}
+
+	result := GetPollResponse{
+		Options: options,
+		Poll:    poll,
+	}
+
+	ctx.JSON(http.StatusOK, result)
 }
 
 func (server *Server) updatePoll(ctx *gin.Context) {
@@ -109,6 +154,37 @@ func (server *Server) updatePoll(ctx *gin.Context) {
 	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	/**
+	* The new active time for a poll cannot be before the current time of updating,
+	* i.e. has to be in the future
+	 */
+	if util.DateBefore(time.Now(), activeTime) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "poll active time must be in the future"})
+		return
+	}
+
+	/**
+	* Verify if the current poll is an active one. Only active polls can be updated
+	 */
+	pollData, err := server.store.IsPollActive(ctx, pollId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "poll is not active "})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	/**
+	 * Only the user that has created the poll can update its contents
+	 */
+	err = verifyUserIdWithToken(pollData.CreatedBy, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -139,7 +215,6 @@ func (server *Server) updatePollStatus(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
-
 	}
 
 	pollId, err := uuid.Parse(uriId.ID)
@@ -150,6 +225,37 @@ func (server *Server) updatePollStatus(ctx *gin.Context) {
 	activeTime, err := time.Parse(UtcDateFormat, req.ActiveUntil)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	/**
+	* The new active time for a poll cannot be before the current time of updating,
+	* i.e. has to be in the future
+	 */
+	if util.DateBefore(time.Now(), activeTime) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "poll active time must be in the future"})
+		return
+	}
+
+	/**
+	* Verify if the current poll is an active one. Only active polls can be updated
+	 */
+	pollData, err := server.store.IsPollActive(ctx, pollId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "poll is not active "})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	/**
+	 * Only the user that has created the poll can update its contents
+	 */
+	err = verifyUserIdWithToken(pollData.CreatedBy, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -169,24 +275,12 @@ func (server *Server) updatePollStatus(ctx *gin.Context) {
 
 func (server *Server) deletePoll(ctx *gin.Context) {
 	var uriId UriID
-	var req DeletePollRequest
 	if err := ctx.ShouldBindUri(&uriId); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
 	pollId, err := uuid.Parse(uriId.ID)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	userId, err := uuid.Parse(req.UserID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -198,7 +292,11 @@ func (server *Server) deletePoll(ctx *gin.Context) {
 		return
 	}
 
-	if poll.CreatedBy != userId {
+	/**
+	 * Only the user that has created the poll can update its contents
+	 */
+	err = verifyUserIdWithToken(poll.CreatedBy, ctx)
+	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}

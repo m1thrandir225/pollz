@@ -11,17 +11,18 @@ VALUES (
 ) RETURNING *;
 
 -- name: GetPolls :many
-SELECT * FROM polls;
+SELECT * FROM polls
+WHERE created_by = $1;
 
 -- name: GetPoll :one
 SELECT * FROM polls
 WHERE id = $1
 LIMIT 1;
 
--- name: GetPollWithOptions :one
-SELECT * FROM polls as p
-JOIN poll_options as po ON p.id = po.poll_id
-WHERE p.id = $1;
+-- name: IsPollActive :one
+SELECT * FROM polls as p 
+WHERE p.active_until > now() AND p.id = $1
+LIMIT 1;
 
 -- name: UpdatePoll :one
 UPDATE polls

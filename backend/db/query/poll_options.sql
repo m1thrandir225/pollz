@@ -12,6 +12,10 @@ SELECT * FROM poll_options
 WHERE id=$1
 LIMIT 1;
 
+-- name: GetOptionsForPoll :many 
+SELECT * FROM poll_options
+WHERE poll_id = $1;
+
 -- name: UpdatePollOption :one
 UPDATE poll_options
 SET option_text=$2
