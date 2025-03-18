@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { User } from "~/server/api/auth/login.post";
+import type { User } from "~/types/user";
 
 defineProps<{
   user: User;

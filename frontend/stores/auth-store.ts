@@ -1,5 +1,6 @@
-import type { LoginResponse, User } from "~/server/api/auth/login.post";
+import type { LoginResponse } from "~/server/api/auth/login.post";
 import type { RefreshTokenResponse } from "~/server/api/auth/refresh-token.post";
+import type { User } from "~/types/user";
 
 export const useAuthStore = defineStore(
   "auth",

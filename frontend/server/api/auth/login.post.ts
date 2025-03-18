@@ -1,18 +1,11 @@
 import { z } from "zod";
 import { apiUrl } from "~/api/config";
+import type { User } from "~/types/user";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
-
-export type User = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string;
-};
 
 export type LoginResponse = {
   user: User;

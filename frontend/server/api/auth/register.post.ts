@@ -1,6 +1,6 @@
-import {z} from "zod";
-import {apiUrl} from "~/api/config";
-import {User} from "./login.post";
+import { z } from "zod";
+import { apiUrl } from "~/api/config";
+import type { User } from "~/types/user";
 
 const registerSchema = z.object({
   firstName: z.string(),
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     throw body.error.issues;
   }
 
-  const {firstName, lastName, email, password} = body.data;
+  const { firstName, lastName, email, password } = body.data;
 
   const response = await fetch(`${apiUrl}/register`, {
     method: "POST",
@@ -42,7 +42,11 @@ export default defineEventHandler(async (event) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || response.statusText);
+    throw createError({
+      status: response.status,
+      statusMessage: response.statusText,
+      message: data.error,
+    });
   }
 
   return data as RegisterResponse;
