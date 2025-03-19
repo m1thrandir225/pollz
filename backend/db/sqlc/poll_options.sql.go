@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -115,24 +116,38 @@ func (q *Queries) GetOption(ctx context.Context, id uuid.UUID) (PollOption, erro
 }
 
 const getOptionsForPoll = `-- name: GetOptionsForPoll :many
-SELECT id, poll_id, option_text, created_at FROM poll_options
+SELECT 
+  po.id, po.poll_id, po.option_text, po.created_at,
+  COUNT(v.id) AS vote_count
+FROM poll_options po 
+LEFT JOIN votes v ON po.id = v.option_id 
 WHERE poll_id = $1
+GROUP BY po.id
 `
 
-func (q *Queries) GetOptionsForPoll(ctx context.Context, pollID uuid.UUID) ([]PollOption, error) {
+type GetOptionsForPollRow struct {
+	ID         uuid.UUID `json:"id"`
+	PollID     uuid.UUID `json:"poll_id"`
+	OptionText string    `json:"option_text"`
+	CreatedAt  time.Time `json:"created_at"`
+	VoteCount  int64     `json:"vote_count"`
+}
+
+func (q *Queries) GetOptionsForPoll(ctx context.Context, pollID uuid.UUID) ([]GetOptionsForPollRow, error) {
 	rows, err := q.db.Query(ctx, getOptionsForPoll, pollID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []PollOption{}
+	items := []GetOptionsForPollRow{}
 	for rows.Next() {
-		var i PollOption
+		var i GetOptionsForPollRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.PollID,
 			&i.OptionText,
 			&i.CreatedAt,
+			&i.VoteCount,
 		); err != nil {
 			return nil, err
 		}

@@ -23,8 +23,13 @@ WHERE id=$1
 LIMIT 1;
 
 -- name: GetOptionsForPoll :many 
-SELECT * FROM poll_options
-WHERE poll_id = $1;
+SELECT 
+  po.*,
+  COUNT(v.id) AS vote_count
+FROM poll_options po 
+LEFT JOIN votes v ON po.id = v.option_id 
+WHERE poll_id = $1
+GROUP BY po.id;
 
 -- name: UpdatePollOption :one
 UPDATE poll_options

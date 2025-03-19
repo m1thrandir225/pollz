@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { apiUrl } from "~/api/config";
-import type { PollWithOptions } from "~/types/poll";
+import type { Poll } from "~/types/poll";
 
 const schema = z.object({
   description: z.string(),
@@ -43,5 +43,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return data as PollWithOptions;
+  return data as Poll;
 });

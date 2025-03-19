@@ -20,8 +20,8 @@ type CreatePollRequest struct {
 }
 
 type GetPollResponse struct {
-	Poll    db.Poll         `json:"poll"`
-	Options []db.PollOption `json:"options"`
+	Poll    db.Poll                   `json:"poll"`
+	Options []db.GetOptionsForPollRow `json:"options"`
 }
 
 type UpdatePollRequest struct {
@@ -82,18 +82,13 @@ func (server *Server) createPoll(ctx *gin.Context) {
 		OptionTexts: req.Options,
 	}
 
-	options, err := server.store.CreateMultipleOptions(ctx, optionArgs)
+	_, err = server.store.CreateMultipleOptions(ctx, optionArgs)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	response := GetPollResponse{
-		Poll:    result,
-		Options: options,
-	}
-
-	ctx.JSON(http.StatusOK, response)
+	ctx.JSON(http.StatusOK, result)
 }
 
 func (server *Server) getPolls(ctx *gin.Context) {

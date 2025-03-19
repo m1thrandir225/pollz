@@ -1,4 +1,4 @@
-import type { PollOption } from "./poll-option";
+import type { PollOptionWithVotes } from "./poll-option";
 
 export type Poll = {
   id: string;
@@ -11,5 +11,5 @@ export type Poll = {
 
 export type PollWithOptions = {
   poll: Poll;
-  options: PollOption[];
+  options: PollOptionWithVotes[];
 };

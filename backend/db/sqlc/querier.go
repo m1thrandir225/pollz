@@ -21,7 +21,7 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id uuid.UUID) (DeleteUserRow, error)
 	DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error)
 	GetOption(ctx context.Context, id uuid.UUID) (PollOption, error)
-	GetOptionsForPoll(ctx context.Context, pollID uuid.UUID) ([]PollOption, error)
+	GetOptionsForPoll(ctx context.Context, pollID uuid.UUID) ([]GetOptionsForPollRow, error)
 	GetPoll(ctx context.Context, id uuid.UUID) (Poll, error)
 	GetPolls(ctx context.Context, createdBy uuid.UUID) ([]Poll, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)

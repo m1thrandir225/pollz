@@ -174,7 +174,7 @@ const onSubmit = handleSubmit(async (values) => {
       }),
     });
 
-    return navigateTo("/polls/" + result.poll.id);
+    return navigateTo("/polls/" + result.id);
   } catch (error) {
     console.error(error);
   }
