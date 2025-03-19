@@ -39,7 +39,6 @@ type User struct {
 type Vote struct {
 	ID        uuid.UUID `json:"id"`
 	OptionID  uuid.UUID `json:"option_id"`
-	UserID    uuid.UUID `json:"user_id"`
 	VotedAt   time.Time `json:"voted_at"`
 	IpAddress string    `json:"ip_address"`
 	UserAgent string    `json:"user_agent"`

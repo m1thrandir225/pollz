@@ -14,37 +14,28 @@ import (
 const createVote = `-- name: CreateVote :one
 INSERT INTO votes(
     option_id,
-    user_id,
     ip_address,
     user_agent
 )
 VALUES (
     $1,
     $2,
-    $3,
-    $4
-) RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
+    $3
+) RETURNING id, option_id, voted_at, ip_address, user_agent
 `
 
 type CreateVoteParams struct {
 	OptionID  uuid.UUID `json:"option_id"`
-	UserID    uuid.UUID `json:"user_id"`
 	IpAddress string    `json:"ip_address"`
 	UserAgent string    `json:"user_agent"`
 }
 
 func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, error) {
-	row := q.db.QueryRow(ctx, createVote,
-		arg.OptionID,
-		arg.UserID,
-		arg.IpAddress,
-		arg.UserAgent,
-	)
+	row := q.db.QueryRow(ctx, createVote, arg.OptionID, arg.IpAddress, arg.UserAgent)
 	var i Vote
 	err := row.Scan(
 		&i.ID,
 		&i.OptionID,
-		&i.UserID,
 		&i.VotedAt,
 		&i.IpAddress,
 		&i.UserAgent,
@@ -55,7 +46,7 @@ func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) (Vote, e
 const deleteVote = `-- name: DeleteVote :one
 DELETE FROM votes
 WHERE id=$1
-RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
+RETURNING id, option_id, voted_at, ip_address, user_agent
 `
 
 func (q *Queries) DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error) {
@@ -64,7 +55,6 @@ func (q *Queries) DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.OptionID,
-		&i.UserID,
 		&i.VotedAt,
 		&i.IpAddress,
 		&i.UserAgent,
@@ -73,7 +63,7 @@ func (q *Queries) DeleteVote(ctx context.Context, id uuid.UUID) (Vote, error) {
 }
 
 const getVote = `-- name: GetVote :one
-SELECT id, option_id, user_id, voted_at, ip_address, user_agent
+SELECT id, option_id, voted_at, ip_address, user_agent
 FROM votes
 WHERE id=$1
 LIMIT 1
@@ -85,7 +75,6 @@ func (q *Queries) GetVote(ctx context.Context, id uuid.UUID) (Vote, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.OptionID,
-		&i.UserID,
 		&i.VotedAt,
 		&i.IpAddress,
 		&i.UserAgent,
@@ -97,7 +86,7 @@ const updateVoteOption = `-- name: UpdateVoteOption :one
 UPDATE votes
 SET option_id=$2
 WHERE id=$1
-RETURNING id, option_id, user_id, voted_at, ip_address, user_agent
+RETURNING id, option_id, voted_at, ip_address, user_agent
 `
 
 type UpdateVoteOptionParams struct {
@@ -111,7 +100,6 @@ func (q *Queries) UpdateVoteOption(ctx context.Context, arg UpdateVoteOptionPara
 	err := row.Scan(
 		&i.ID,
 		&i.OptionID,
-		&i.UserID,
 		&i.VotedAt,
 		&i.IpAddress,
 		&i.UserAgent,

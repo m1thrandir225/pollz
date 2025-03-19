@@ -1,15 +1,13 @@
 -- name: CreateVote :one
 INSERT INTO votes(
     option_id,
-    user_id,
     ip_address,
     user_agent
 )
 VALUES (
     $1,
     $2,
-    $3,
-    $4
+    $3
 ) RETURNING *;
 
 -- name: GetVote :one
