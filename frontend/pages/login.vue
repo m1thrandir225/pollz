@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/html-self-closing -->
 <template>
   <div
-    class="flex flex-col items-center justify-center w-full gap-8 min-h-[650px]"
+    class="flex min-h-[650px] w-full flex-col items-center justify-center gap-8"
   >
     <h1
       class="font-mono text-4xl font-bold text-neutral-900 dark:text-neutral-100"
@@ -9,13 +9,13 @@
       Login
     </h1>
     <form
-      class="flex flex-col items-center gap-4 p-16 rounded-sm border border-neutral-900 dark:border-neutral-100"
+      class="flex flex-col items-center gap-4 rounded-sm border border-neutral-900 p-16 dark:border-neutral-100"
       @submit="onSubmit"
     >
       <div class="flex flex-col items-start gap-2">
         <label
           for="email"
-          class="text-neutral-900 dark:text-neutral-100 font-mono"
+          class="font-mono text-neutral-900 dark:text-neutral-100"
           >Email</label
         >
         <input
@@ -25,16 +25,16 @@
           name="email"
           placeholder="your email"
           v-bind="emailAttrs"
-          class="w-full px-3 py-2 text-sm transition duration-300 border shadow-sm bg-neutral-900 dark:bg-neutral-50 placeholder:text-neutral-400 text-neutral-100 dark:text-neutral-900 dark:placeholder:text-neutral-400 border-slate-200 ease focus:outline-none focus:border-orange-400 hover:border-orange-300 focus:shadow placeholder:font-mono"
+          class="ease w-full border border-slate-200 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
         />
-        <p v-if="errors.email" class="text-red-500 max-w-[150px] text-sm">
+        <p v-if="errors.email" class="max-w-[150px] text-sm text-red-500">
           {{ errors.email }}
         </p>
       </div>
       <div class="flex flex-col items-start gap-2">
         <label
           for="password"
-          class="text-neutral-900 dark:text-neutral-100 font-mono"
+          class="font-mono text-neutral-900 dark:text-neutral-100"
           >Password</label
         >
         <input
@@ -44,22 +44,22 @@
           placeholder="your password"
           name="password"
           v-bind="passwordAttrs"
-          class="w-full px-3 py-2 text-sm transition duration-300 border shadow-sm bg-neutral-900 dark:bg-neutral-50 placeholder:text-neutral-400 text-neutral-100 dark:text-neutral-900 dark:placeholder:text-neutral-400 border-slate-200 ease focus:outline-none focus:border-orange-400 hover:border-orange-300 focus:shadow placeholder:font-mono"
+          class="ease w-full border border-slate-200 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
         />
-        <p v-if="errors.password" class="text-red-500 max-w-[150px] text-sm">
+        <p v-if="errors.password" class="max-w-[150px] text-sm text-red-500">
           {{ errors.password }}
         </p>
       </div>
       <button
         type="submit"
-        class="w-full bg-orange-600 dark:text-neutral-100 text-neutral-900 px-8 py-2 border border-transparent hover:border-neutral-900 dark:hover:border-neutral-100 transition-all ease-in-out duration-100"
+        class="w-full border border-transparent bg-orange-600 px-8 py-2 text-neutral-900 transition-all duration-100 ease-in-out hover:border-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-100"
       >
         Continue
       </button>
     </form>
     <p class="font-mono text-neutral-900 dark:text-neutral-100">
       Don't have an account?
-      <NuxtLink to="/register" class="text-orange-600 font-bold"
+      <NuxtLink to="/register" class="font-bold text-orange-600"
         >Register</NuxtLink
       >
     </p>

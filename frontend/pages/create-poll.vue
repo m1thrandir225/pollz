@@ -1,6 +1,6 @@
 <template>
-  <div class="max-w-lg flex items-center mx-auto justify-center">
-    <form class="w-full flex flex-col gap-8" @submit="onSubmit">
+  <div class="mx-auto flex max-w-lg items-center justify-center">
+    <form class="flex w-full flex-col gap-8" @submit="onSubmit">
       <h1 class="font-mono text-xl font-bold">Create a poll</h1>
       <div class="flex flex-col items-start gap-2">
         <label for="description" class="font-mono">Description</label>
@@ -11,13 +11,13 @@
           name="description"
           placeholder="what's this poll about?"
           v-bind="descriptionAttrs"
-          class="w-full min-w-[250px] px-3 py-2 text-sm transition duration-300 border shadow-sm bg-neutral-900 dark:bg-neutral-50 placeholder:text-neutral-400 dark:placeholder:text-neutral-400 text-neutral-100 dark:text-neutral-900 sborder-slate-200 ease focus:outline-none focus:border-orange-400 hover:border-orange-300 focus:shadow placeholder:font-mono"
-        />
-        <p v-if="errors.description" class="text-red-500 max-w-[150px] text-sm">
+          class="sborder-slate-200 ease w-full min-w-[250px] border bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
+        >
+        <p v-if="errors.description" class="max-w-[150px] text-sm text-red-500">
           {{ errors.description }}
         </p>
       </div>
-      <div class="flex flex-row justify-between items-center gap-2">
+      <div class="flex flex-row items-center justify-between gap-2">
         <label for="active_until" class="font-mono">Active Time</label>
         <select
           v-bind="activeUntilAttrs"
@@ -39,37 +39,37 @@
       <div class="flex flex-col items-start gap-2">
         <label
           for="options"
-          class="text-neutral-900 dark:text-neutral-100 font-mono"
+          class="font-mono text-neutral-900 dark:text-neutral-100"
           >Options</label
         >
-        <div class="flex flex-row items-center justify-between gap-4 w-full">
+        <div class="flex w-full flex-row items-center justify-between gap-4">
           <input
-            v-model="optionInput"
             id="options"
+            v-model="optionInput"
             type="text"
             name="options"
             placeholder="add a poll option"
-            class="w-full min-w-[250px] px-3 py-2 text-sm transition duration-300 border shadow-sm bg-neutral-900 dark:bg-neutral-50 placeholder:text-neutral-400 text-neutral-100 dark:text-neutral-900 dark:placeholder:text-neutral-400 border-slate-200 ease focus:outline-none focus:border-orange-400 hover:border-orange-300 focus:shadow placeholder:font-mono"
-          />
+            class="ease w-full min-w-[250px] border border-slate-200 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
+          >
           <button type="button" class="w-auto" @click="addOption()">Add</button>
         </div>
-        <p v-if="errors.description" class="text-red-500 max-w-[150px] text-sm">
+        <p v-if="errors.description" class="max-w-[150px] text-sm text-red-500">
           {{ errors.description }}
         </p>
       </div>
       <div
-        class="flex flex-col w-full max-h-[300px] overflow-y-scroll p-4 border border-neutral-900 dark:border-neutral-100 gap-4"
         v-if="options && options?.length > 0"
+        class="flex max-h-[300px] w-full flex-col gap-4 overflow-y-scroll border border-neutral-900 p-4 dark:border-neutral-100"
       >
         <div
           v-for="(option, index) in options"
           :key="index"
-          class="w-full flex flex-row items-center justify-between px-4 py-4 border-b border-neutral-200 dark:border-neural-600"
+          class="dark:border-neural-600 flex w-full flex-row items-center justify-between border-b border-neutral-200 px-4 py-4"
         >
           {{ option }}
           <button
+            class="flex cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:text-red-500"
             @click="removeOption(index)"
-            class="cursor-pointer flex items-center justify-center hover:text-red-500 transition-all ease-in-out duration-300"
           >
             <Icon
               name="material-symbols:delete-outline"
@@ -82,7 +82,7 @@
 
       <button
         type="submit"
-        class="w-full bg-orange-600 dark:text-neutral-100 text-neutral-900 px-8 py-2 border border-transparent hover:border-neutral-900 dark:hover:border-neutral-100 transition-all ease-in-out duration-100"
+        class="w-full border border-transparent bg-orange-600 px-8 py-2 text-neutral-900 transition-all duration-100 ease-in-out hover:border-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-100"
       >
         Continue
       </button>
@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { useField, useFieldArray, useForm } from "vee-validate";
+import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 
@@ -119,7 +119,7 @@ const { defineField, errors, handleSubmit } = useForm({
 
 const [description, descriptionAttrs] = defineField("description");
 const [activeUntil, activeUntilAttrs] = defineField("active_until");
-const [options, optionsAttrs] = defineField("options");
+const [options] = defineField("options");
 
 const addOption = () => {
   if (optionInput.value.trim()) {
@@ -165,7 +165,7 @@ const onSubmit = handleSubmit(async (values) => {
     const result = await $fetch("/api/polls", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${authStore.accessToken!!}`,
+        Authorization: `Bearer ${authStore.accessToken!}`,
       },
       body: JSON.stringify({
         description: values.description,

@@ -2,7 +2,9 @@ import * as z from "zod";
 import { apiUrl } from "~/api/config";
 import type { Vote } from "~/types/vote";
 
-const schema = z.object({});
+const schema = z.object({
+  optionId: z.string(),
+});
 
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, schema.safeParse);
@@ -10,22 +12,20 @@ export default defineEventHandler(async (event) => {
   if (!body.success) {
     throw body.error.issues;
   }
-  const authToken = event.headers.get("Authorization");
 
-  if (!authToken) {
-    throw createError({
-      status: 403,
-      statusMessage: "Missing bearer token",
-      message: "Missing bearer token",
-    });
-  }
+  const ipAddress = getRequestIP(event, { xForwardedFor: true });
+  const userAgent = event.headers.get("user-agent");
+
   const response = await fetch(`${apiUrl}/vote`, {
     method: "POST",
     headers: {
-      Authorization: authToken,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      option_id: body.data.optionId,
+    }),
   });
 
   const data = await response.json();

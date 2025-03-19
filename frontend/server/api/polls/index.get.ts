@@ -1,5 +1,5 @@
 import { apiUrl } from "~/api/config";
-import { Poll } from "~/types/poll";
+import type { Poll } from "~/types/poll";
 
 /**
  * API route for all the polls the user has (both active and inactive)

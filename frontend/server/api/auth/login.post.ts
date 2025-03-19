@@ -35,7 +35,11 @@ export default defineEventHandler(async (event) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || response.statusText);
+    throw createError({
+      status: response.status,
+      statusMessage: response.statusText,
+      message: data.error,
+    });
   }
 
   return data as LoginResponse;

@@ -11,8 +11,8 @@
       </h1>
       <div class="flex flex-row gap-2">
         <button
-          @click="toggleActive()"
           class="px-4 py-2 border border-neutral-400 flex items-center justify-center rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:border-transparent hover:text-orange-600 transition-all ease-in-out duration-300 text-neutral-900 dark:text-neutral-100"
+          @click="toggleActive()"
         >
           <Icon
             :name="
