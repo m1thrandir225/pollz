@@ -1,17 +1,17 @@
 <template>
   <div
-    class="flex flex-col items-start gap-8 lg:max-w-[650px] max-w-[90%] mx-auto w-full"
+    class="mx-auto flex w-full max-w-[90%] flex-col items-start gap-8 lg:max-w-[650px]"
   >
-    <div class="flex flex-row justify-between w-full">
+    <div class="flex w-full flex-row justify-between">
       <h1 class="font-mono text-neutral-900 dark:text-neutral-100">
         Showing:
-        <span class="text-orange-600 text-[12px]">
+        <span class="text-[12px] text-orange-600">
           {{ showActive ? "current" : "expired" }} polls</span
         >
       </h1>
       <div class="flex flex-row gap-2">
         <button
-          class="px-4 py-2 border border-neutral-400 flex items-center justify-center rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:border-transparent hover:text-orange-600 transition-all ease-in-out duration-300 text-neutral-900 dark:text-neutral-100"
+          class="flex items-center justify-center rounded-md border border-neutral-400 px-4 py-2 text-neutral-900 transition-all duration-300 ease-in-out hover:border-transparent hover:bg-neutral-200 hover:text-orange-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
           @click="toggleActive()"
         >
           <Icon
@@ -26,7 +26,7 @@
         </button>
         <NuxtLink
           to="/create-poll"
-          class="px-4 py-2 border border-neutral-400 flex items-center justify-center rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:border-transparent hover:text-orange-600 transition-all ease-in-out duration-300 text-neutral-900 dark:text-neutral-100"
+          class="flex items-center justify-center rounded-md border border-neutral-400 px-4 py-2 text-neutral-900 transition-all duration-300 ease-in-out hover:border-transparent hover:bg-neutral-200 hover:text-orange-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
         >
           <Icon name="material-symbols:add" size="18px" mode="css" />
         </NuxtLink>
@@ -34,7 +34,7 @@
     </div>
 
     <div
-      class="flex flex-col items-start w-full gap-4 h-[600px] overflow-y-scroll px-4 py-4"
+      class="flex h-[600px] w-full flex-col items-start gap-4 overflow-y-scroll px-4 py-4"
     >
       <PollListItem
         v-for="item in showActive ? activePolls : inactivePolls"

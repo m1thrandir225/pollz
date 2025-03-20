@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center w-full my-8 gap-8 overflow-hidden">
+  <div class="my-8 flex w-full flex-col items-center gap-8 overflow-hidden">
     <PollList v-if="data" :list="data" />
   </div>
 </template>
