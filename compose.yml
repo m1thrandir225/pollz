@@ -1,11 +1,11 @@
 services:
   frontend:
     platform: linux/amd64
-    image: m1thrandir/pollz-backend
+    image: m1thrandir/pollz-frontend
     build:
       context: frontend
     ports:
-      - "3030:3030"
+      - "3030:3000"
     networks:
       - pollz-network
     depends_on:
@@ -13,7 +13,7 @@ services:
       - db
   backend:
     platform: linux/amd64
-    image: m1thrandir/pollz-frontend
+    image: m1thrandir/pollz-backend
     build:
       context: backend
     environment:
@@ -37,7 +37,7 @@ services:
     networks:
       - pollz-network
     healthcheck:
-      test: [ "CMD", "bash", "/usr/local/bin/healthcheck.sh" ]
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 3

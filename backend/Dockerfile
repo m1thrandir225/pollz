@@ -1,4 +1,6 @@
-FROM golang:1.23-alpine AS builder
+ARG GO_VERSION=1.24.1
+
+FROM golang:${GO_VERSION}-alpine AS builder
 RUN apk update && apk add --no-cache git
 WORKDIR /app
 COPY go.mod go.sum ./
