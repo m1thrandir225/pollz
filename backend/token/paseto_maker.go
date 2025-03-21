@@ -2,9 +2,9 @@ package token
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"log"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/aead/chacha20poly1305"
 	"github.com/o1egl/paseto"
@@ -16,7 +16,6 @@ type PasetoMaker struct {
 }
 
 func NewPasetoMaker(symmetricKey string) (TokenMaker, error) {
-	log.Println(len(symmetricKey))
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", chacha20poly1305.KeySize)
 	}
@@ -33,7 +32,6 @@ func NewPasetoMaker(symmetricKey string) (TokenMaker, error) {
 
 func (maker *PasetoMaker) CreateToken(userId uuid.UUID, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(userId, duration)
-
 	if err != nil {
 		return "", nil, err
 	}
@@ -47,7 +45,6 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	payload := &Payload{}
 
 	err := maker.encryptor.Decrypt(token, maker.symmetricKey, payload, nil)
-
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
