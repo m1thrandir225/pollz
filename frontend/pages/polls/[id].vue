@@ -4,18 +4,26 @@
     v-else-if="status === 'success' && data"
     class="mx-auto my-4 flex max-w-[650px] flex-col items-start gap-8 transition-all duration-300 ease-in-out"
   >
-    <div class="flex w-full flex-row items-center justify-between">
+    <div class="flex w-full flex-row items-start justify-between">
       <h1>{{ data.poll.description }}</h1>
-
-      <p class="">
-        Active until <br />
-        <span class="text-[12px] text-orange-600">{{
-          formatDate(new Date(data.poll.active_until))
-        }}</span>
-      </p>
-      <button type="button" @click="toggleQr()">QR</button>
+      <div class="flex flex-row items-start gap-4">
+        <p class="">
+          Active until <br />
+          <span class="text-[12px] text-orange-600">{{
+            formatDate(new Date(data.poll.active_until))
+          }}</span>
+        </p>
+        <button
+          class="flex items-center justify-center rounded-md border border-neutral-400 px-4 py-2 text-neutral-900 transition-all duration-300 ease-in-out hover:border-transparent hover:bg-neutral-200 hover:text-orange-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          @click="toggleQr()"
+        >
+          <Icon name="material-symbols:share" size="18px" mode="css" />
+        </button>
+      </div>
     </div>
-    <PollQR v-if="qrShown" :url="route.fullPath" />
+    <Transition name="fade">
+      <PollShare v-if="qrShown" :url="route.fullPath" />
+    </Transition>
     <PollVote
       v-if="!hasVoted && !isPollByUser"
       :options="data.options"
@@ -30,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import PollQR from "~/components/polls/PollQR.vue";
+import PollShare from "~/components/polls/PollShare.vue";
 import PollStatsChart from "~/components/polls/PollStatsChart.vue";
 import PollStatsTable from "~/components/polls/PollStatsTable.vue";
 import PollVote from "~/components/polls/PollVote.vue";

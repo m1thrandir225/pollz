@@ -12,7 +12,7 @@
           placeholder="what's this poll about?"
           v-bind="descriptionAttrs"
           class="sborder-slate-200 ease w-full min-w-[250px] border bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
-        >
+        />
         <p v-if="errors.description" class="max-w-[150px] text-sm text-red-500">
           {{ errors.description }}
         </p>
@@ -50,7 +50,7 @@
             name="options"
             placeholder="add a poll option"
             class="ease w-full min-w-[250px] border border-slate-200 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 shadow-sm transition duration-300 placeholder:font-mono placeholder:text-neutral-400 hover:border-orange-300 focus:border-orange-400 focus:shadow focus:outline-none dark:bg-neutral-50 dark:text-neutral-900 dark:placeholder:text-neutral-400"
-          >
+          />
           <button type="button" class="w-auto" @click="addOption()">Add</button>
         </div>
         <p v-if="errors.description" class="max-w-[150px] text-sm text-red-500">
@@ -94,6 +94,10 @@
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
+
+definePageMeta({
+  middleware: "auth",
+});
 
 const selectActiveTimes = ref(["1 day", "2 day", "1 week"]);
 
