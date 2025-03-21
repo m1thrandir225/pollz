@@ -31,6 +31,27 @@ func TestCreatePollOption(t *testing.T) {
 	createRandomPollOption(t, poll.ID)
 }
 
+func TestCreateMultipleOptions(t *testing.T) {
+	user := createRandomUser(t)
+	poll := createRandomPoll(t, user.ID)
+
+	options := []string{"option 1", "option 2", "option 3"}
+
+	arg := CreateMultipleOptionsParams{
+		PollID:      poll.ID,
+		OptionTexts: options,
+	}
+
+	result, err := testStore.CreateMultipleOptions(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+
+	require.Equal(t, len(options), len(result))
+	for _, v := range result {
+		require.Equal(t, v.PollID, poll.ID)
+	}
+}
+
 func TestGetOption(t *testing.T) {
 	user := createRandomUser(t)
 	poll := createRandomPoll(t, user.ID)
@@ -43,6 +64,27 @@ func TestGetOption(t *testing.T) {
 	require.Equal(t, option.CreatedAt, result.CreatedAt)
 	require.Equal(t, option.PollID, result.PollID)
 	require.Equal(t, poll.ID, result.PollID)
+}
+
+func TestGetOptionsForPoll(t *testing.T) {
+	user := createRandomUser(t)
+	poll := createRandomPoll(t, user.ID)
+
+	options := make([]PollOption, 10)
+	for i := range options {
+		option := createRandomPollOption(t, poll.ID)
+		options[i] = option
+	}
+
+	result, err := testStore.GetOptionsForPoll(context.Background(), poll.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+
+	require.Equal(t, len(options), len(result))
+
+	for _, v := range result {
+		require.Equal(t, v.PollID, poll.ID)
+	}
 }
 
 func TestUpdatePollOption(t *testing.T) {

@@ -128,3 +128,16 @@ func TestGetPolls(t *testing.T) {
 	require.NotEmpty(t, polls)
 	require.Equal(t, len(poll_arr), len(polls))
 }
+
+func TestIsPollActive(t *testing.T) {
+	user := createRandomUser(t)
+	poll := createRandomPoll(t, user.ID)
+
+	/**
+	 * no results since active_until (time of creation ) < now()
+	 */
+	result, err := testStore.IsPollActive(context.Background(), poll.ID)
+
+	require.Error(t, err)
+	require.Empty(t, result)
+}
