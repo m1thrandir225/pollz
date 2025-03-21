@@ -19,19 +19,31 @@
       :options="data.options"
       :refresh-page-data="refresh"
     />
-    <div v-else>
-      <h1>Already voted ..</h1>
-      <p>stats ...</p>
+    <div v-else class="flex w-full flex-col items-start gap-8">
+      <h1>Poll Stats:</h1>
+      <PollStatsChart v-if="chartData" :chart-data="chartData" />
+      <PollStatsTable :data="data.options" />
     </div>
   </div>
-  <div v-else>Error...</div>
 </template>
 
 <script setup lang="ts">
+import PollStatsChart from "~/components/polls/PollStatsChart.vue";
+import PollStatsTable from "~/components/polls/PollStatsTable.vue";
 import PollVote from "~/components/polls/PollVote.vue";
+const route = useRoute();
+
+const { data, error, status, refresh } = await useFetch(
+  `/api/polls/${route.params.id}`,
+  {
+    method: "GET",
+  },
+);
+useSeoMeta({
+  title: data ? `${data.value?.poll.description}` : "poll details",
+});
 
 const voteStore = useVoteStore();
-const route = useRoute();
 
 const authStore = useAuthStore();
 
@@ -49,12 +61,12 @@ const hasVoted = computed(() => {
   });
 });
 
-const { data, error, status, refresh } = await useFetch(
-  `/api/polls/${route.params.id}`,
-  {
-    method: "GET",
-  },
-);
+const chartData = computed(() => {
+  if (!data.value || !data.value?.options) return null;
+
+  return buildChartData(data.value?.options);
+});
+
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode,
