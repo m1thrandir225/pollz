@@ -4,8 +4,10 @@ services:
     image: m1thrandir/pollz-frontend
     build:
       context: frontend
+    environment:
+      - API_SOURCE=http://backend:8081
     ports:
-      - "3030:3000"
+      - "3000:3000"
     networks:
       - pollz-network
     depends_on:
@@ -16,11 +18,9 @@ services:
     image: m1thrandir/pollz-backend
     build:
       context: backend
-    environment:
-      DB_SOURCE: db:5432
-      ENVIRONMENT: production
     env_file:
-      - .env
+      - path: ./.env
+        required: true
     ports:
       - "8081:8081"
     networks:
@@ -30,9 +30,10 @@ services:
   db:
     image: postgres:17.4
     env_file:
-      - .env
+      - path: ./.env
+        required: true
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - db_pollz:/var/lib/postgresql/data
       - ./scripts/db-healthcheck.sh:/usr/local/bin/healthcheck.sh
     ports:
       - "5432:5432"
@@ -48,4 +49,4 @@ networks:
   pollz-network:
     driver: bridge
 volumes:
-  postgres-data:
+  db_pollz:

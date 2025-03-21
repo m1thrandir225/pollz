@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiSource: process.env.API_SOURCE || "http://localhost:8080",
+      apiSource: process.env.API_SOURCE,
     },
   },
   app: {

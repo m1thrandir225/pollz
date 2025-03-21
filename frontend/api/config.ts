@@ -1,5 +1,3 @@
-const runtimeConfig = useRuntimeConfig();
-
-export const baseUrl = runtimeConfig.public.apiSource;
+export const baseUrl = process.env.API_SOURCE;
 
 export const apiUrl = `${baseUrl}/api/v1`;
