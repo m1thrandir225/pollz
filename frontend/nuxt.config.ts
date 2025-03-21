@@ -23,6 +23,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@vueuse/nuxt",
+    "@vueuse/motion/nuxt",
   ],
   vite: {
     plugins: [tailwindcss()],

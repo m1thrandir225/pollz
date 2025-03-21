@@ -2,7 +2,7 @@
   <div v-if="status === 'pending'">Loading...</div>
   <div
     v-else-if="status === 'success' && data"
-    class="mx-auto my-4 flex max-w-[650px] flex-col items-start gap-8"
+    class="mx-auto my-4 flex max-w-[650px] flex-col items-start gap-8 transition-all duration-300 ease-in-out"
   >
     <div class="flex w-full flex-row items-center justify-between">
       <h1>{{ data.poll.description }}</h1>
@@ -13,7 +13,9 @@
           formatDate(new Date(data.poll.active_until))
         }}</span>
       </p>
+      <button type="button" @click="toggleQr()">QR</button>
     </div>
+    <PollQR v-if="qrShown" :url="route.fullPath" />
     <PollVote
       v-if="!hasVoted && !isPollByUser"
       :options="data.options"
@@ -28,10 +30,15 @@
 </template>
 
 <script setup lang="ts">
+import PollQR from "~/components/polls/PollQR.vue";
 import PollStatsChart from "~/components/polls/PollStatsChart.vue";
 import PollStatsTable from "~/components/polls/PollStatsTable.vue";
 import PollVote from "~/components/polls/PollVote.vue";
 const route = useRoute();
+
+const qrShown = ref(false);
+
+const toggleQr = useToggle(qrShown);
 
 const { data, error, status, refresh } = await useFetch(
   `/api/polls/${route.params.id}`,
