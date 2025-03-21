@@ -1,3 +1,5 @@
-export const baseUrl = "http://localhost:8080";
+const runtimeConfig = useRuntimeConfig();
+
+export const baseUrl = runtimeConfig.public.apiSource;
 
 export const apiUrl = `${baseUrl}/api/v1`;

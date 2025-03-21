@@ -4,6 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      apiSource: process.env.API_SOURCE || "http://localhost:8080",
+    },
+  },
   app: {
     head: {
       title: "Pollz",
