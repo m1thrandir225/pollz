@@ -2,44 +2,41 @@ name: Test Code
 
 on:
   push:
-    branches: [master]
+    branches: [master] # Consider using 'main' if that's your default branch
     paths:
       - "backend/**"
       - ".github/workflows/test.yml"
   pull_request:
-    branches: [master]
+    branches: [master] # Consider using 'main'
     paths:
       - "backend/**"
       - ".github/workflows/test.yml"
 
+# Top-level env: Define BASE constants
 env:
-  DB_USER: pollz
-  DB_PASS: testpassword123
-  DB_TEST_NAME: pollz_test
-  TESTING_DB_SOURCE: pgx5://pollz:testpassword123@localhost:5432/pollz_test?sslmode=disable
-  MIGRATE_DB_URL_FOR_CLI: postgresql://pollz:testpassword123@localhost:5432/pollz_test?sslmode=disable
-  ENVIRONMENT: CI
+  WORKFLOW_DB_PASS: password
+  WORKFLOW_DB_TEST_NAME: pollz_test
+  WORKFLOW_ENVIRONMENT: CI
+  TESTING_DB_SOURCE: pgx5://pollz:password@localhost:5432/pollz_test?sslmode=disable
+  MIGRATE_DB_URL_FOR_CLI: postgresql://postgres:password@localhost:5432/pollz_test?sslmode=disable
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: ./backend # All 'run' steps will execute here
     services:
       postgres:
-        image: postgres
+        image: postgres:17-alpine # Using specific version from your original Makefile
         env:
-          POSTGRES_USER: ${{ env.DB_USER }}
-          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
-          POSTGRES_DB: ${{ env.DB_TEST_NAME}}
+          POSTGRES_PASSWORD: ${{ env.WORKFLOW_DB_PASS }}
+          POSTGRES_DB: ${{ env.WORKFLOW_DB_TEST_NAME }}
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        # More specific health check
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,14 +44,30 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "backend/go.mod"
+          go-version-file: "backend/go.mod" # Path relative to repo root
+
       - name: Install golang-migrate CLI
         run: |
           go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Run database migrations for test database
-        run: migrate -path db/migrations -database "${MIGRATE_DB_URL_FOR_CLI}" -verbose up
+        # This will now use the correctly formed MIGRATE_DB_URL_FOR_CLI from the job's env
+        run: migrate -path db/migrations -database "$MIGRATE_DB_URL_FOR_CLI" -verbose up
+
+      - name: Debug Environment Variables
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "--- Values from job environment: ---"
+          echo "ENVIRONMENT is: $ENVIRONMENT"
+          echo "DB_USER is: $DB_USER"
+          echo "DB_PASS (value is set, may be masked in log): $DB_PASS"
+          echo "DB_TEST_NAME is: $DB_TEST_NAME"
+          echo "TESTING_DB_SOURCE is: $TESTING_DB_SOURCE"
+          echo "MIGRATE_DB_URL_FOR_CLI is: $MIGRATE_DB_URL_FOR_CLI"
+
       - name: Run Tests
-        env:
-          TESTING_DB_SOURCE: ${{ env.TESTING_DB_SOURCE}}
+        # No need for a step-level 'env' block to redefine TESTING_DB_SOURCE.
+        # It will inherit the correctly formed one from the job's 'env' block.
         run: go test -v -cover -short ./...
+        env:
+          TESTING_DB_SOURCE: postgresql://postgres:password@localhost:5432/pollz_test
