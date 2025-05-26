@@ -10,8 +10,8 @@ env:
   DB_USER: pollz
   DB_PASS: secret
   DB_TEST_NAME: pollz_test
-  TESTING_DB_SOURCE: pgx5://${{ env.DB_USER }}:${{ env.DB_PASS }}@localhost:5432/${{ env.DB_TEST_NAME }}?sslmode=disable
-  MIGRATE_DB_URL_FOR_CLI: postgresql://${{ env.DB_USER }}:${{ env.DB_PASS }}@localhost:5432/${{ env.DB_TEST_NAME }}?sslmode=disable
+  TESTING_DB_SOURCE: pgx5://$pollz:secret@localhost:5432/pollz_test?sslmode=disable
+  MIGRATE_DB_URL_FOR_CLI: postgresql://pollz:secret@localhost:5432/pollz_test?sslmode=disable
   ENVIRONMENT: ci
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready -U ${{ env.DB_USER }} -d ${{ env.DB_TEST_NAME }}
+          --health-cmd pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
