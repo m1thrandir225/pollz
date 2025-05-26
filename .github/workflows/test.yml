@@ -3,8 +3,14 @@ name: Test Code
 on:
   push:
     branches: [master]
+    paths:
+      - "backend/**"
+      - ".github/workflows/test.yml"
   pull_request:
     branches: [master]
+    paths:
+      - "backend/**"
+      - ".github/workflows/test.yml"
 
 env:
   DB_USER: pollz
@@ -17,6 +23,9 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     services:
       postgres:
         image: postgres
@@ -44,6 +53,6 @@ jobs:
           go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Run database migrations for test database
-        run: migrate -path backend/db/migrations -database "${MIGRATE_DB_URL_FOR_CLI}" -verbose up
+        run: migrate -path db/migrations -database "${MIGRATE_DB_URL_FOR_CLI}" -verbose up
       - name: Run Tests
-        run: go test -v -cover -short ./..
+        run: go test -v -cover -short ./...
