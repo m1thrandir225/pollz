@@ -8,6 +8,7 @@ func (server *Server) setupRouter() {
 	v1 := router.Group("/api/v1")
 
 	/** Public Routes */
+	v1.GET("/status", server.healthCheck)
 	v1.POST("/login", server.loginUser)
 	v1.POST("/register", server.registerUser)
 	v1.POST("/refresh-token", server.refreshToken)
@@ -18,7 +19,6 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/user/:id", server.getUser)
 
 	/** Poll Routes */
-
 	authRoutes.GET("/polls", server.getPolls) // Get your polls
 	v1.GET("/polls/:id", server.getPoll)
 

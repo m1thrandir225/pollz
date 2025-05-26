@@ -12,13 +12,11 @@ export const useAuthStore = defineStore(
     const user = ref<User | null>(null);
     const isRefreshing = ref(false);
 
-    // Add a buffer time (e.g., 5 minutes) to refresh before expiration
-    const TOKEN_REFRESH_BUFFER = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const TOKEN_REFRESH_BUFFER = 5 * 60 * 1000;
 
     const shouldRefreshToken = computed(() => {
       const now = new Date();
 
-      // First check if we have all the necessary data
       if (!accessToken.value || !refreshToken.value) {
         return false;
       }
@@ -27,7 +25,6 @@ export const useAuthStore = defineStore(
         return false;
       }
 
-      // Ensure we have proper Date objects
       const accessExpiry =
         accessTokenExpiresAt.value instanceof Date
           ? accessTokenExpiresAt.value
@@ -38,35 +35,29 @@ export const useAuthStore = defineStore(
           ? refreshTokenExpiresAt.value
           : new Date(refreshTokenExpiresAt.value);
 
-      // Check if refresh token is still valid
       if (now.getTime() >= refreshExpiry.getTime()) {
-        return false; // Refresh token expired, can't refresh
+        return false;
       }
 
-      // Check if access token needs refreshing (expired or about to expire)
       return now.getTime() >= accessExpiry.getTime() - TOKEN_REFRESH_BUFFER;
     });
 
     const isAuthenticated = computed(() => {
       const now = new Date();
 
-      // Check if we have the necessary tokens
       if (!accessToken.value || !accessTokenExpiresAt.value) {
         return false;
       }
 
-      // Ensure we have a proper Date object
       const accessExpiry =
         accessTokenExpiresAt.value instanceof Date
           ? accessTokenExpiresAt.value
           : new Date(accessTokenExpiresAt.value);
 
-      // If we have a valid access token
       if (now.getTime() < accessExpiry.getTime()) {
         return true;
       }
 
-      // If access token expired, check if refresh token is valid
       if (!refreshToken.value || !refreshTokenExpiresAt.value) {
         return false;
       }

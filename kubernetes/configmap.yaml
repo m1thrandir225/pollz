@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-healthcheck-script
+  namespace: pollz
+data:
+  healthcheck.sh: |
+    #!/bin/bash
+    pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h localhost || exit 1
