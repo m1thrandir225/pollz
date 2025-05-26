@@ -16,7 +16,7 @@ env:
   DB_USER: pollz
   DB_PASS: testpassword123
   DB_TEST_NAME: pollz_test
-  TESTING_DB_SOURCE: pgx5://$pollz:testpassword123@localhost:5432/pollz_test?sslmode=disable
+  TESTING_DB_SOURCE: pgx5://pollz:testpassword123@localhost:5432/pollz_test?sslmode=disable
   MIGRATE_DB_URL_FOR_CLI: postgresql://pollz:testpassword123@localhost:5432/pollz_test?sslmode=disable
   ENVIRONMENT: CI
 

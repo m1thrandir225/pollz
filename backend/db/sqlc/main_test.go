@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"log"
-	"m1thrandir225/cicd2025/util"
 	"os"
 	"testing"
 
@@ -13,12 +12,12 @@ import (
 var testStore Store
 
 func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../../")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
+	connString := os.Getenv("TESTING_DB_SOURCE")
+	if connString == "" {
+		log.Fatal("TESTING_DB_SOURCE environment variable not set")
 	}
 
-	connPool, err := pgxpool.New(context.Background(), config.TestingDbSource)
+	connPool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		log.Fatal("cannot connect to test database:", err)
 	}
