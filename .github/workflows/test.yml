@@ -46,4 +46,4 @@ jobs:
       - name: Run database migrations for test database
         run: migrate -path backend/db/migrations -database "${MIGRATE_DB_URL_FOR_CLI}" -verbose up
       - name: Run Tests
-        run: go test -v -cover -short ./backend/..
+        run: go test -v -cover -short ./..
