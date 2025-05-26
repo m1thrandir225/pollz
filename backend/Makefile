@@ -1,4 +1,4 @@
-DB_CONTAINER=pollz_db
+DB_CONTAINER=pollz-db-1
 DB_NAME=pollz_db
 DB_TEST_NAME=pollz_test
 DB_USER=pollz

@@ -1,0 +1,49 @@
+name: Test Code
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DB_USER: pollz
+  DB_PASS: secret
+  DB_TEST_NAME: pollz_test
+  TESTING_DB_SOURCE: pgx5://${{ env.DB_USER }}:${{ env.DB_PASS }}@localhost:5432/${{ env.DB_TEST_NAME }}?sslmode=disable
+  MIGRATE_DB_URL_FOR_CLI: postgresql://${{ env.DB_USER }}:${{ env.DB_PASS }}@localhost:5432/${{ env.DB_TEST_NAME }}?sslmode=disable
+  ENVIRONMENT: ci
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ${{ env.DB_USER }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
+          POSTGRES_DB: ${{ env.DB_TEST_NAME}}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready -U ${{ env.DB_USER }} -d ${{ env.DB_TEST_NAME }}
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "backend/go.mod"
+      - name: Install golang-migrate CLI
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+      - name: Run database migrations for test database
+        run: migrate -path backend/db/migrations -databse "${MIGRATE_DB_URL_FOR_CLI}" -verbose up
+      - name: Run Tests
+        run: go test -v -cover -short ./backend/..
