@@ -12,7 +12,7 @@
       class="cursor-pointer rounded-md bg-neutral-300 px-8 py-2 transition-all duration-300 ease-in-out hover:bg-neutral-200 dark:bg-neutral-600 dark:hover:bg-neutral-700"
       @click="copyUrl"
     >
-      {{ url }}
+      {{ route.fullPath }}
     </button>
   </div>
 </template>
@@ -21,6 +21,8 @@
 const props = defineProps<{
   url: string;
 }>();
+
+const route = useRoute();
 
 const showCopiedMessage = ref(false);
 

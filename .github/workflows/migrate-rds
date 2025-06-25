@@ -1,0 +1,51 @@
+name: Deploy DB Migrations on RDS
+
+on:
+  workflow_dispatch:
+    inputs:
+      entrypoint:
+        description: "Environment to deploy to"
+        required: true
+        default: "production"
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/db/migrations/**"
+jobs:
+  run_rds_migrations:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.input.environment || 'production' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "backend/go.mod"
+      - name: Install golang-migrate
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - name: Construct DB URL
+        id: db_url_constructor
+        run: |
+          DB_URL="postgresql://${{ secrets.RDS_DB_USER }}:${{ secrets.RDS_DB_PASSWORD }}@${{ secrets.RDS_DB_HOST}}:${{ secrets.RDS_DB_PORT}}/${{ secrets.RDS_DB_NAME }}?sslmode=require"
+          echo "DB_URL_FOR_LOGGING=postgresql://${{ secrets.RDS_DB_USER }}:***@${{ secrets.RDS_DB_HOST }}:${{ secrets.RDS_DB_PORT }}/${{ secrets.RDS_DB_NAME }}?sslmode=require"
+          echo "DB_CONNECTION_URL=$DB_URL" >> $GITHUB_OUTPUT
+        env:
+          RDS_DB_HOST: ${{ secrets.RDS_DB_HOST }}
+          RDS_DB_PORT: ${{ secrets.RDS_DB_PORT || '5432' }}
+          RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
+          RDS_DB_USER: ${{ secrets.RDS_DB_USER }}
+          RDS_DB_PASSWORD: ${{ secrets.RDS_DB_PASSWORD }}
+      - name: Run Migrations
+        run: |
+          echo "Running migrations from path: backend/db/migrations"
+          migrate -path backend/db/migrations -database "${{ secrets.db_url_constructor.outputs.DB_CONNECTION_URL }}" -verbose up
+
+      - name: Show Migration Version (Optional)
+        if: always()
+        run: |
+          echo "Checking current migration version..."
+          migrate -path backend/db/migrations -database "${{ steps.db_url_constructor.outputs.DB_CONNECTION_URL }}" version
