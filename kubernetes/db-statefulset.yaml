@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: db
   namespace: pollz
 spec:
+  serviceName: "db"
   replicas: 1
   selector:
     matchLabels:
@@ -45,7 +46,11 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 3
-      volumes:
-        - name: postgres-data
-          persistentVolumeClaim:
-            claimName: db-pollz-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

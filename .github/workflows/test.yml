@@ -2,17 +2,16 @@ name: Test Code
 
 on:
   push:
-    branches: [master] # Consider using 'main' if that's your default branch
+    branches: [master]
     paths:
       - "backend/**"
       - ".github/workflows/test.yml"
   pull_request:
-    branches: [master] # Consider using 'main'
+    branches: [master]
     paths:
       - "backend/**"
       - ".github/workflows/test.yml"
 
-# Top-level env: Define BASE constants
 env:
   WORKFLOW_DB_PASS: password
   WORKFLOW_DB_TEST_NAME: pollz_test
@@ -25,16 +24,15 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend # All 'run' steps will execute here
+        working-directory: ./backend
     services:
       postgres:
-        image: postgres:17-alpine # Using specific version from your original Makefile
+        image: postgres:17-alpine
         env:
           POSTGRES_PASSWORD: ${{ env.WORKFLOW_DB_PASS }}
           POSTGRES_DB: ${{ env.WORKFLOW_DB_TEST_NAME }}
         ports:
           - 5432:5432
-        # More specific health check
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
@@ -44,14 +42,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "backend/go.mod" # Path relative to repo root
+          go-version-file: "backend/go.mod"
 
       - name: Install golang-migrate CLI
         run: |
           go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Run database migrations for test database
-        # This will now use the correctly formed MIGRATE_DB_URL_FOR_CLI from the job's env
         run: migrate -path db/migrations -database "$MIGRATE_DB_URL_FOR_CLI" -verbose up
 
       - name: Debug Environment Variables
@@ -66,8 +63,6 @@ jobs:
           echo "MIGRATE_DB_URL_FOR_CLI is: $MIGRATE_DB_URL_FOR_CLI"
 
       - name: Run Tests
-        # No need for a step-level 'env' block to redefine TESTING_DB_SOURCE.
-        # It will inherit the correctly formed one from the job's 'env' block.
         run: go test -v -cover -short ./...
         env:
           TESTING_DB_SOURCE: postgresql://postgres:password@localhost:5432/pollz_test
