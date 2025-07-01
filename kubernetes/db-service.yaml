@@ -4,9 +4,10 @@ metadata:
   name: db
   namespace: pollz
 spec:
+  type: LoadBalancer
   selector:
     app: db
   ports:
     - port: 5432
       name: postgres
-  clusterIP: None
+      targetPort: 5432
