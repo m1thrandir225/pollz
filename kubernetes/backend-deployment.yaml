@@ -16,6 +16,7 @@ spec:
       containers:
         - name: backend
           image: m1thrandir/pollz-backend
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
           envFrom:
